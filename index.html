@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Uzay Oyunu</title>
+    <title>Uzay Oyunu - Online</title>
     <style>
         body {
             margin: 0;
@@ -34,6 +34,52 @@
             left: 0;
         }
     </style>
+    <!-- Firebase SDK Entegrasyonu (Canlı Dünya Liderlik Tablosu) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, orderBy, limit, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA8tHshD07zjKY_dOa68bvzEzUoWijRuG4",
+            authDomain: "uzay-oyunu-728ad.firebaseapp.com",
+            projectId: "uzay-oyunu-728ad",
+            storageBucket: "uzay-oyunu-728ad.firebasestorage.app",
+            messagingSenderId: "271347336001",
+            appId: "1:271347336001:web:14948e8cd40f95880857c0",
+            measurementId: "G-0R7YPWWSBM"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.fetchCloudLeaderboard = async function() {
+            try {
+                const q = query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(10));
+                const querySnapshot = await getDocs(q);
+                let cloudList = [];
+                querySnapshot.forEach((doc) => {
+                    cloudList.push(doc.data());
+                });
+                return cloudList;
+            } catch (e) {
+                console.error("Liderlik tablosu çekilemedi:", e);
+                return [];
+            }
+        };
+
+        window.saveScoreToCloud = async function(name, score) {
+            if (!name || name.trim() === "") return;
+            try {
+                await setDoc(doc(db, "leaderboard", name), {
+                    name: name,
+                    score: score,
+                    lastUpdated: Date.now()
+                }, { merge: true });
+            } catch (e) {
+                console.error("Skor buluta kaydedilemedi:", e);
+            }
+        };
+    </script>
 </head>
 <body>
 
@@ -45,83 +91,44 @@
         const ctx = canvas.getContext("2d");
         const hiddenInput = document.getElementById("hiddenInput");
 
-        let mouseX = 0;
-        let mouseY = 0;
-        let keys = {};
-
+        let mouseX = 0, mouseY = 0, keys = {};
         let playerName = "";
         let nameInputRect = { x: canvas.width / 2 - 200, y: canvas.height / 2 - 20, width: 400, height: 60 };
         let nameSubmitBtn = { x: canvas.width / 2 - 140, y: canvas.height / 2 + 60, width: 280, height: 60 };
         let nameErrorMsg = "";
 
         let gameState = 'name_entry'; 
-        let currentLevel = 1;
-        let unlockedLevel = 1;
-        let levelPage = 1;
-        let completedUniqueLevels = [];
+        let currentLevel = 1, unlockedLevel = 1, levelPage = 1, completedUniqueLevels = [];
+        let totalCoins = 0, totalWins = 0;
+        let stats = { totalEnemiesKilled: 0, totalBulletsFired: 0 };
+        let cachedCloudPlayers = [];
 
-        let totalCoins = 0;
-        let totalWins = 0;
-
-        let stats = {
-            totalEnemiesKilled: 0,
-            totalBulletsFired: 0
-        };
+        async function updateCloudData() {
+            if (window.fetchCloudLeaderboard) {
+                cachedCloudPlayers = await window.fetchCloudLeaderboard();
+            }
+        }
+        setInterval(updateCloudData, 5000);
 
         const touchLeftBtn = { x: 50, y: canvas.height - 180, width: 130, height: 130 };
         const touchRightBtn = { x: 200, y: canvas.height - 180, width: 130, height: 130 };
         const touchShootBtn = { x: canvas.width - 180, y: canvas.height - 180, width: 130, height: 130 };
-
-        let touchLeftActive = false;
-        let touchRightActive = false;
-
-        function getGlobalLeaderboard() {
-            let baseList = [
-                { name: "Kaptan Hamza", score: 14500 },
-                { name: "Yusuf Pro", score: 12300 },
-                { name: "Metehan", score: 9800 },
-                { name: "Asena", score: 8700 },
-                { name: "Eren Uzay", score: 7500 },
-                { name: "Burak Pilot", score: 6400 }
-            ];
-
-            let myScore = (stats.totalEnemiesKilled * 100) + (totalWins * 500);
-            if (playerName.trim() !== "") {
-                let existing = baseList.find(p => p.name === playerName);
-                if (existing) {
-                    if (myScore > existing.score) existing.score = myScore;
-                } else {
-                    baseList.push({ name: playerName, score: myScore });
-                }
-            }
-
-            baseList.sort((a, b) => b.score - a.score);
-            return baseList;
-        }
+        let touchLeftActive = false, touchRightActive = false;
 
         function saveGameData() {
             const gameData = {
-                playerName: playerName,
-                currentLevel: currentLevel,
-                unlockedLevel: unlockedLevel,
-                completedUniqueLevels: completedUniqueLevels,
-                totalCoins: totalCoins,
-                totalWins: totalWins,
-                hasAlienWarrior: hasAlienWarrior,
-                hasDogWarrior: hasDogWarrior,
-                selectedWarrior: selectedWarrior,
-                hasBordoEffect: hasBordoEffect,
-                isBordoEffectEquipped: isBordoEffectEquipped,
-                hasOrangeEffect: hasOrangeEffect,
-                isOrangeEffectEquipped: isOrangeEffectEquipped,
-                hasDoubleShot: hasDoubleShot,
-                isDoubleShotEquipped: isDoubleShotEquipped,
-                hasPoisonBullet: hasPoisonBullet,
-                isPoisonBulletEquipped: isPoisonBulletEquipped,
-                stats: stats,
-                titles: titles
+                playerName, currentLevel, unlockedLevel, completedUniqueLevels,
+                totalCoins, totalWins, hasAlienWarrior, hasDogWarrior, selectedWarrior,
+                hasBordoEffect, isBordoEffectEquipped, hasOrangeEffect, isOrangeEffectEquipped,
+                hasDoubleShot, isDoubleShotEquipped, hasPoisonBullet, isPoisonBulletEquipped,
+                stats, titles
             };
             localStorage.setItem("kaptanHamzaUzaySave", JSON.stringify(gameData));
+            
+            let myScore = (stats.totalEnemiesKilled * 100) + (totalWins * 500);
+            if (playerName.trim() !== "" && window.saveScoreToCloud) {
+                window.saveScoreToCloud(playerName, myScore);
+            }
         }
 
         function loadGameData() {
@@ -158,76 +165,32 @@
                     if (playerName.trim() !== "") {
                         gameState = 'start';
                         hiddenInput.style.display = 'none';
+                        updateCloudData();
                     }
-                } catch (e) {
-                    console.error("Kayıt yükleme hatası:", e);
-                }
+                } catch (e) {}
             }
         }
-
         loadGameData();
 
-        let quest1Progress = 0, quest1Completed = false, quest1Claimed = false;
-        let quest2Progress = 0, quest2Completed = false, quest2Claimed = false;
-
         let shopCategory = 'efekt';
-        let isShopOpen = false;
-        let isWarriorsOpen = false;
-        let isHelpOpen = false;
-        let isProfileOpen = false;
-        let isNewsOpen = false;
-        let isQuestsOpen = false;
-        let isUniverseMapOpen = false;
-        let isTitlesOpen = false;
-        let isSpaceStationOpen = false;
+        let isShopOpen = false, isWarriorsOpen = false, isHelpOpen = false, isProfileOpen = false, isNewsOpen = false, isQuestsOpen = false, isUniverseMapOpen = false, isTitlesOpen = false, isSpaceStationOpen = false;
         let selectedCelestialBody = null;
+        let isTrainingMode = false, isBotVsMode = false;
+        let botVsState = 'select_char', selectedBotCharacter = 'hamza', botDifficulty = 'orta';
 
-        let isTrainingMode = false;
-        let isBotVsMode = false;
-        let botVsState = 'select_char'; 
-        let selectedBotCharacter = 'hamza';
-        let botDifficulty = 'orta';
+        let selectedWarrior = 'hamza';
+        let hasAlienWarrior = false, hasDogWarrior = false;
+        let hasBordoEffect = false, isBordoEffectEquipped = false;
+        let hasOrangeEffect = false, isOrangeEffectEquipped = false;
+        let hasDoubleShot = false, isDoubleShotEquipped = false;
+        let hasPoisonBullet = false, isPoisonBulletEquipped = false;
+        let poisonAmmoCount = 3, isPoisonActive = false, poisonTimer = 0, poisonTickTimer = 0;
 
-        let selectedWarrior = 'hamza'; 
-        let hasAlienWarrior = false;
-        let hasDogWarrior = false;
+        let playerWidth = 70, playerHeight = 85;
+        let player = { x: canvas.width / 2 - playerWidth / 2, y: canvas.height - playerHeight - 25, width: playerWidth, height: playerHeight, speed: 9, hp: 100, maxHp: 100 };
 
-        let hasBordoEffect = false;
-        let isBordoEffectEquipped = false;
-        let hasOrangeEffect = false;
-        let isOrangeEffectEquipped = false;
-
-        let hasDoubleShot = false;
-        let isDoubleShotEquipped = false;
-        let hasPoisonBullet = false;
-        let isPoisonBulletEquipped = false;
-        let poisonAmmoCount = 3;
-        let isPoisonActive = false;
-        let poisonTimer = 0;
-        let poisonTickTimer = 0;
-
-        let playerWidth = 70;
-        let playerHeight = 85;
-        let player = {
-            x: canvas.width / 2 - playerWidth / 2,
-            y: canvas.height - playerHeight - 25,
-            width: playerWidth,
-            height: playerHeight,
-            speed: 9,
-            hp: 100,
-            maxHp: 100
-        };
-
-        let bullets = [];
-        let bulletSpeed = 12;
-        let enemies = [];
-        let enemyBullets = [];
-        let apples = [];
-        let appleNotificationTimer = 0;
-        let lastAppleTime = Date.now();
-        let isBossSpawned = false;
-        let isSinsiBossStage = false;
-        let sinsiTeleportTimer = 0;
+        let bullets = [], bulletSpeed = 12, enemies = [], enemyBullets = [], apples = [];
+        let lastAppleTime = Date.now(), isBossSpawned = false;
 
         const playerImg = new Image(); playerImg.src = 'astronot_11.png';
         const alienImg = new Image(); alienImg.src = 'Uzaylı.png';
@@ -240,16 +203,16 @@
         ];
 
         const celestialData = {
-            gunes: { name: "⭐ GÜNEŞ (Sistemin Kalbi)", info: "Güneş, Güneş Sistemi'nin merkezinde yer alan devasa bir yıldızdır.\n\n💡 OYUN İPUCU: Güneş'in enerjisi uzay geminize kalkan sağlar! Savaşlarda enerji dolumunu hızlandırır." },
-            merkur: { name: "🪐 MERKÜR (En İçteki Gezegen)", info: "Güneş'e en yakın gezegendir. Yüzeyi aşırı sıcak ve kraterlerle doludur.\n\n💡 OYUN İPUCU: Merkür aşırı sıcak olduğu için bu bölümlerde mermileriniz ekstra ısınır." },
-            venus: { name: "🪐 VENÜS (Sıcak Cehennem)", info: "Güneş sisteminin en sıcak gezegenidir. Kalın atmosferi zehirli gazlardan oluşur.\n\n💡 OYUN İPUCU: Venüs'ün zehirli bulutları arasında savaşırken Q tuşundaki zehir mermisi daha etkili olur." },
-            dunya: { name: "🌍 DÜNYA (Evimiz)", info: "Üzerinde su barındıran, yaşamın olduğu bilinen tek gezegendir.\n\n💡 OYUN İPUCU: Dünya seviyelerinde uzay geminiz oksijen desteği alır ve hızınız %10 artar." },
-            ay: { name: "🌕 AY (Dünya'nın Uydusu)", info: "Dünya'nın tek doğal uydusudur. 10. Seviyeden sonra maceralar burada başlar!\n\n💡 OYUN İPUCU: Ay'da yerçekimi düşük olduğu için geminiz hafifler, manevralarınızı dikkatli yapın." },
-            mars: { name: "🔴 MARS (Kızıl Gezegen)", info: "Paslı demir toprakları yüzünden kırmızı görünür. Gelecekteki evimiz olabilir.\n\n💡 OYUN İPUCU: Mars topraklarındaki fırtınalar düşmanların nişan almasını zorlaştırır." },
-            jupiter: { name: "⚡ JÜPİTER (Dev Gaz Devi)", info: "Sistemin en büyük gezegenidir. Büyük Kırmızı Leke adı verilen dev fırtınası vardır.\n\n💡 OYUN İPUCU: Jüpiter'in manyetik alanı çift mermi atış gücünüzü doğrudan destekler." },
-            saturn: { name: "💫 SATÜRN (Halkaların Efendisi)", info: "Buz ve kayalardan oluşan muhteşem halkalarıyla ünlüdür.\n\n💡 OYUN İPUCU: Satürn halkalarının arasından geçerken akçe toplama bonusu kazanırsınız." },
-            uranus: { name: "❄️ URANÜS (Buz Devi)", info: "Yan yatmış bir varil gibi kendi etrafında dönen soğuk bir gaz devidir.\n\n💡 OYUN İPUCU: Uranüs'ün buzlu ortamında düşman mermileri biraz daha yavaş hareket eder." },
-            neptun: { name: "🌀 NEPTÜN (Rüzgarlı Gezegen)", info: "Güneş sistemindeki en şiddetli rüzgarların estiği masmavi gezegendir.\n\n💡 OYUN İPUCU: Neptün'ün şiddetli rüzgarları geminizi ileri iter, hızınızı akıllıca kullanın." }
+            gunes: { name: "⭐ GÜNEŞ (Sistemin Kalbi)", info: "Güneş, Güneş Sistemi'nin merkezinde yer alan devasa bir yıldızdır.\n\n💡 OYUN İPUCU: Güneş'in enerjisi kalkan sağlar!" },
+            merkur: { name: "🪐 MERKÜR (En İçteki Gezegen)", info: "Güneş'e en yakın gezegendir. Yüzeyi aşırı sıcak ve kraterlerle doludur." },
+            venus: { name: "🪐 VENÜS (Sıcak Cehennem)", info: "Güneş sisteminin en sıcak gezegenidir. Kalın atmosferi zehirli gazlardan oluşur." },
+            dunya: { name: "🌍 DÜNYA (Evimiz)", info: "Üzerinde su barındıran, yaşamın olduğu bilinen tek gezegendir." },
+            ay: { name: "🌕 AY (Dünya'nın Uydusu)", info: "Dünya'nın tek doğal uydusudur. 10. Seviyeden sonra maceralar burada başlar!" },
+            mars: { name: "🔴 MARS (Kızıl Gezegen)", info: "Paslı demir toprakları yüzünden kırmızı görünür." },
+            jupiter: { name: "⚡ JÜPİTER (Dev Gaz Devi)", info: "Sistemin en büyük gezegenidir." },
+            saturn: { name: "💫 SATÜRN (Halkaların Efendisi)", info: "Buz ve kayalardan oluşan muhteşem halkalarıyla ünlüdür." },
+            uranus: { name: "❄️ URANÜS (Buz Devi)", info: "Yan yatmış bir varil gibi kendi etrafında dönen soğuk bir gaz devidir." },
+            neptun: { name: "🌀 Neptün", info: "Şiddetli rüzgarların estiği masmavi gezegendir." }
         };
 
         let radioMessages = [
@@ -259,7 +222,6 @@
             "📡 MERKEZ: Dükkandaki özel güçler savaşta hayat kurtarır!"
         ];
         let currentRadioText = "📡 Telsiz açık. Haberler bekleniyor...";
-        let radioTextTimer = 0;
 
         const startBtn = { x: canvas.width / 2 - 130, y: canvas.height / 2 + 60, width: 260, height: 70 };
         const warriorsBtn = { x: canvas.width / 2 - 130, y: canvas.height / 2 + 145, width: 260, height: 65 };
@@ -347,9 +309,6 @@
         const closeNewsBtn = { x: canvas.width / 2 - 90, y: canvas.height / 2 + 280, width: 180, height: 50 };
         const closeQuestsBtn = { x: canvas.width / 2 - 90, y: canvas.height / 2 + 270, width: 180, height: 50 };
 
-        const claimQuest1Btn = { x: canvas.width / 2 + 150, y: 315, width: 180, height: 45 };
-        const claimQuest2Btn = { x: canvas.width / 2 + 150, y: 440, width: 180, height: 45 };
-
         const nextLevelBtn = { x: canvas.width / 2 - 135, y: canvas.height / 2 - 30, width: 270, height: 55 };
         const restartBtn = { x: canvas.width / 2 - 135, y: canvas.height / 2 + 35, width: 270, height: 55 };
         const menuBtn = { x: canvas.width / 2 - 135, y: canvas.height / 2 + 100, width: 270, height: 55 };
@@ -363,7 +322,7 @@
             let forbiddenNames = ["Yusuf Pro", "Metehan", "Asena", "Eren Uzay", "Admin"];
             if (forbiddenNames.includes(enteredName)) { nameErrorMsg = "⚠️ Bu isim zaten başkası tarafından kullanılıyor!"; return; }
             playerName = enteredName; nameErrorMsg = "";
-            hiddenInput.style.display = 'none'; gameState = 'start'; saveGameData();
+            hiddenInput.style.display = 'none'; gameState = 'start'; saveGameData(); updateCloudData();
         }
 
         window.addEventListener("click", () => { if (gameState === 'name_entry') hiddenInput.focus(); });
@@ -453,7 +412,7 @@
             if (selectedCelestialBody) { if (isHovered(closeInfoCardBtn)) selectedCelestialBody = null; return; }
             if (isSpaceStationOpen) {
                 if (isHovered(closeSpaceStationBtn)) isSpaceStationOpen = false;
-                else if (isHovered(radioBtn)) { currentRadioText = radioMessages[Math.floor(Math.random() * radioMessages.length)]; radioTextTimer = 500; }
+                else if (isHovered(radioBtn)) { currentRadioText = radioMessages[Math.floor(Math.random() * radioMessages.length)]; }
                 else { for (let i = 0; i < celestialButtons.length; i++) { if (isHovered(celestialButtons[i])) { selectedCelestialBody = celestialData[celestialButtons[i].id]; break; } } }
                 return;
             }
@@ -461,12 +420,7 @@
             if (isUniverseMapOpen) { if (isHovered(closeUniverseMapBtn)) isUniverseMapOpen = false; return; }
             if (gameState === 'playing' && (isTrainingMode || isBotVsMode) && isHovered(exitTrainingBtn)) { goToMainMenu(); return; }
             if (isNewsOpen) { if (isHovered(closeNewsBtn)) isNewsOpen = false; return; }
-            if (isQuestsOpen) {
-                if (isHovered(closeQuestsBtn)) isQuestsOpen = false;
-                if (!quest1Claimed && quest1Completed && isHovered(claimQuest1Btn)) { totalCoins += 50; quest1Claimed = true; saveGameData(); }
-                if (!quest2Claimed && quest2Completed && isHovered(claimQuest2Btn)) { totalCoins += 100; quest2Claimed = true; saveGameData(); }
-                return;
-            }
+            if (isQuestsOpen) { if (isHovered(closeQuestsBtn)) isQuestsOpen = false; return; }
             if (isShopOpen) {
                 if (isHovered(catEfektBtn)) shopCategory = 'efekt';
                 if (isHovered(catOzelGucBtn)) shopCategory = 'ozel_guc';
@@ -513,7 +467,7 @@
                 if (isHovered(newsBox)) { isNewsOpen = true; return; }
                 if (isHovered(questsBtn)) { isQuestsOpen = true; return; }
                 if (isHovered(shopBtn)) { isShopOpen = true; return; }
-                if (isHovered(profileBtn)) { isProfileOpen = true; return; }
+                if (isHovered(profileBtn)) { isProfileOpen = true; updateCloudData(); return; }
                 if (isHovered(warriorsBtn)) { isWarriorsOpen = true; return; }
                 if (isHovered(helpBtn)) { isHelpOpen = true; return; }
                 if (isHovered(otherModesBtn)) { gameState = 'other_modes'; return; }
@@ -594,7 +548,7 @@
             player.maxHp = selectedWarrior === 'dog' ? 85 : selectedWarrior === 'alien' ? 105 : 100;
             player.hp = player.maxHp; player.speed = selectedWarrior === 'dog' ? 12 : 9;
             bullets = []; enemyBullets = []; apples = []; lastAppleTime = Date.now();
-            isBossSpawned = false; isSinsiBossStage = false; initEnemies(currentLevel);
+            isBossSpawned = false; initEnemies(currentLevel);
             gameState = 'playing';
         }
 
@@ -615,20 +569,11 @@
             if (isTrainingMode) {
                 enemies = [
                     { x: 150, y: 100, width: 85, height: 60, hp: 1000, maxHp: 1000, dx: 1.8, shootTimer: 0, shootInterval: 99999, bulletColor: "#000", bulletSpeed: 0, color: "#7209b7" },
-                    { x: 500, y: 150, width: 85, height: 60, hp: 1000, maxHp: 1000, dx: -1.8, shootTimer: 0, shootInterval: 99999, bulletColor: "#000", bulletSpeed: 0, color: "#7209b7" },
-                    { x: 850, y: 100, width: 85, height: 60, hp: 1000, maxHp: 1000, dx: 1.8, shootTimer: 0, shootInterval: 99999, bulletColor: "#000", bulletSpeed: 0, color: "#7209b7" }
+                    { x: 500, y: 150, width: 85, height: 60, hp: 1000, maxHp: 1000, dx: -1.8, shootTimer: 0, shootInterval: 99999, bulletColor: "#000", bulletSpeed: 0, color: "#7209b7" }
                 ];
                 return;
             }
-            if (level >= 11) {
-                enemies = [
-                    { x: 300, y: 110, width: 75, height: 50, hp: 70 + (level * 2), maxHp: 70 + (level * 2), dx: 1.6, shootTimer: 0, shootInterval: 280, bulletColor: "#e056fd", bulletSpeed: 2.2, color: "#7209b7" },
-                    { x: 900, y: 110, width: 75, height: 50, hp: 70 + (level * 2), maxHp: 70 + (level * 2), dx: -1.6, shootTimer: 0, shootInterval: 280, bulletColor: "#00f0ff", bulletSpeed: 2.2, color: "#0077b6" }
-                ];
-                return;
-            }
-            if (level === 1) enemies = [{ x: 400, y: 110, width: 80, height: 55, hp: 15, maxHp: 15, dx: 1.2, shootTimer: 0, shootInterval: 350, bulletColor: "#ff3333", bulletSpeed: 1.8, color: "#e63946" }, { x: 1250, y: 160, width: 80, height: 55, hp: 15, maxHp: 15, dx: -1.2, shootTimer: 0, shootInterval: 350, bulletColor: "#ff3333", bulletSpeed: 1.8, color: "#e63946" }];
-            else if (level === 5) enemies = [{ x: 300, y: 110, width: 80, height: 55, hp: 15, maxHp: 15, dx: 1.5, shootTimer: 0, shootInterval: 300, bulletColor: "#ff3333", bulletSpeed: 2.0, color: "#e63946" }];
+            if (level === 1) enemies = [{ x: 400, y: 110, width: 80, height: 55, hp: 15, maxHp: 15, dx: 1.2, shootTimer: 0, shootInterval: 350, bulletColor: "#ff3333", bulletSpeed: 1.8, color: "#e63946" }];
             else enemies = [{ x: 400, y: 110, width: 80, height: 55, hp: 20 + level * 3, maxHp: 20 + level * 3, dx: 1.5, shootTimer: 0, shootInterval: 300, bulletColor: "#00f0ff", bulletSpeed: 2.0, color: "#0077b6" }];
         }
 
@@ -642,11 +587,6 @@
                     if (enemies[0].hp <= 0) { stats.totalEnemiesKilled++; enemies.splice(0, 1); }
                     poisonTickTimer = 0;
                 }
-            }
-
-            if (!isBotVsMode && Date.now() - lastAppleTime >= 8000) {
-                apples.push({ x: Math.random() * (canvas.width - 60), y: -40, size: 35, speed: 3.5 });
-                lastAppleTime = Date.now();
             }
 
             if ((keys["ArrowLeft"] || touchLeftActive) && player.x > 0) player.x -= player.speed;
@@ -665,11 +605,6 @@
                     }
                 }
                 if (hit || (bullets[i] && bullets[i].y < -20)) bullets.splice(i, 1);
-            }
-
-            if (currentLevel === 5 && enemies.length === 0 && !isBossSpawned) {
-                isBossSpawned = true;
-                enemies = [{ x: canvas.width / 2 - 90, y: 100, width: 180, height: 110, hp: 60, maxHp: 60, dx: 2.0, shootTimer: 0, shootInterval: 240, bulletColor: "#00ff66", bulletSpeed: 1.8, color: "#2dc653", isBoss: true }];
             }
 
             if (enemies.length === 0) {
@@ -698,26 +633,7 @@
                     en.x += en.dx;
                     if (en.x <= 20 || en.x + en.width >= canvas.width - 20) en.dx *= -1;
                 }
-                if (!isTrainingMode) {
-                    en.shootTimer++;
-                    if (en.shootTimer >= en.shootInterval) {
-                        let sx = en.x + en.width / 2, sy = en.y + en.height;
-                        let ang = Math.atan2((player.y + player.height / 2) - sy, (player.x + player.width / 2) - sx);
-                        enemyBullets.push({ x: sx, y: sy, vx: Math.cos(ang) * en.bulletSpeed, vy: Math.sin(ang) * en.bulletSpeed, size: 10, color: en.bulletColor });
-                        en.shootTimer = 0;
-                    }
-                }
             });
-
-            for (let i = enemyBullets.length - 1; i >= 0; i--) {
-                let eb = enemyBullets[i]; eb.x += eb.vx; eb.y += eb.vy;
-                if (eb.x > player.x && eb.x < player.x + player.width && eb.y > player.y && eb.y < player.y + player.height) {
-                    player.hp -= 5; enemyBullets.splice(i, 1);
-                    if (player.hp <= 0) { player.hp = 0; gameState = 'gameover'; }
-                    continue;
-                }
-                if (eb.y > canvas.height + 20) enemyBullets.splice(i, 1);
-            }
         }
 
         function drawButton(btn, bg, hoverBg, txtCol, txt, fontSize = "18px", locked = false) {
@@ -734,8 +650,7 @@
 
         function draw() {
             if (gameState === 'name_entry') {
-                ctx.fillStyle = "#07071a";
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "#07071a"; ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = "#00d2ff"; ctx.font = "bold 60px Arial";
                 ctx.fillText("🚀 UZAY MACERASI", canvas.width / 2 - 270, canvas.height / 2 - 180);
                 ctx.fillStyle = "#ffffff"; ctx.font = "bold 24px Arial";
@@ -752,11 +667,10 @@
                 return;
             }
 
-            ctx.fillStyle = "#07071a";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#07071a"; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             if (gameState === 'start') {
-                drawButton(profileBtn, "#10b981", "#34d399", "#ffffff", "👤 PROFİL", "19px");
+                drawButton(profileBtn, "#10b981", "#34d399", "#ffffff", "👤 DÜNYA LİDERLİK", "19px");
                 drawButton(shopBtn, "#00d2ff", "#38bdf8", "#000000", "🛒 DÜKKAN", "19px");
                 drawButton({ x: shopBtn.x + shopBtn.width + 15, y: shopBtn.y, width: 200, height: 50 }, "#ffd700", "#fde047", "#000000", "🪙 AKÇE: " + totalCoins, "18px");
                 drawButton(helpBtn, "#a855f7", "#c084fc", "#ffffff", "❓ YARDIM", "19px");
@@ -769,7 +683,7 @@
                 ctx.strokeStyle = "#00d2ff"; ctx.strokeRect(newsBox.x, newsBox.y, newsBox.width, newsBox.height);
                 ctx.fillStyle = "#00d2ff"; ctx.font = "bold 17px Arial"; ctx.fillText("📰 DÜNYA HABERLERİ", newsBox.x + 35, newsBox.y + 35);
                 ctx.fillStyle = "#ffffff"; ctx.font = "14px Arial"; ctx.fillText("Liderlik tablosuna dünyadaki", newsBox.x + 15, newsBox.y + 80);
-                ctx.fillText("tüm kaptanlar eklendi!", newsBox.x + 15, newsBox.y + 110);
+                ctx.fillText("tüm kaptanlar bağlandı!", newsBox.x + 15, newsBox.y + 110);
 
                 drawButton(questsBtn, "#e056fd", "#f368e0", "#ffffff", "🎯 GÖREVLER", "18px");
 
@@ -781,29 +695,71 @@
                 if (isProfileOpen) {
                     ctx.fillStyle = "rgba(0, 20, 15, 0.98)"; ctx.fillRect(150, 70, canvas.width - 300, canvas.height - 140);
                     ctx.strokeStyle = "#10b981"; ctx.lineWidth = 4; ctx.strokeRect(150, 70, canvas.width - 300, canvas.height - 140);
-                    ctx.fillStyle = "#10b981"; ctx.font = "bold 32px Arial";
-                    ctx.fillText("🌍 DÜNYA ÇAPINDAKİ KAPTANLAR LİDERLİK TABLOSU", canvas.width / 2 - 420, 130);
+                    ctx.fillStyle = "#10b981"; ctx.font = "bold 30px Arial";
+                    ctx.fillText("🌍 DÜNYADAKİ TÜM GERÇEK OYUNCULAR (CANLI)", canvas.width / 2 - 380, 130);
 
-                    let globalPlayers = getGlobalLeaderboard();
                     let lbY = 190;
-                    globalPlayers.forEach((p, idx) => {
-                        let isMe = p.name === playerName;
-                        let medal = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : "🎖️";
-                        ctx.fillStyle = isMe ? "rgba(0, 255, 102, 0.25)" : "rgba(255, 255, 255, 0.08)";
-                        ctx.fillRect(200, lbY, canvas.width - 400, 50);
-                        ctx.strokeStyle = isMe ? "#00ff66" : "#555"; ctx.strokeRect(200, lbY, canvas.width - 400, 50);
-                        ctx.fillStyle = isMe ? "#00ff66" : "#ffffff"; ctx.font = "bold 20px Arial";
-                        ctx.fillText(`${idx + 1}. ${medal}  ${p.name} ${isMe ? "(SEN)" : ""}`, 230, lbY + 32);
-                        ctx.fillStyle = "#ffd700"; ctx.fillText(`${p.score} Puan`, canvas.width - 350, lbY + 32);
-                        lbY += 60;
-                    });
+                    if (cachedCloudPlayers.length === 0) {
+                        ctx.fillStyle = "#ffffff"; ctx.font = "20px Arial";
+                        ctx.fillText("Bulutta henüz oyuncu yok veya yükleniyor...", canvas.width / 2 - 200, lbY + 50);
+                    } else {
+                        cachedCloudPlayers.forEach((p, idx) => {
+                            let isMe = p.name === playerName;
+                            let medal = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : "🎖️";
+                            ctx.fillStyle = isMe ? "rgba(0, 255, 102, 0.25)" : "rgba(255, 255, 255, 0.08)";
+                            ctx.fillRect(200, lbY, canvas.width - 400, 48);
+                            ctx.strokeStyle = isMe ? "#00ff66" : "#555"; ctx.strokeRect(200, lbY, canvas.width - 400, 48);
+                            ctx.fillStyle = isMe ? "#00ff66" : "#ffffff"; ctx.font = "bold 19px Arial";
+                            ctx.fillText(`${idx + 1}. ${medal}  ${p.name} ${isMe ? "(SEN)" : ""}`, 230, lbY + 31);
+                            ctx.fillStyle = "#ffd700"; ctx.fillText(`${p.score} Puan`, canvas.width - 350, lbY + 31);
+                            lbY += 55;
+                        });
+                    }
                     drawButton(closeProfileBtn, "#ff3366", "#fb7185", "#ffffff", "KAPAT", "20px");
                 }
                 return;
             }
 
+            if (gameState === 'level_select') {
+                ctx.fillStyle = "#00d2ff"; ctx.font = "bold 45px Arial";
+                ctx.fillText("🌌 BÖLÜM SEÇİMİ (Sayfa " + levelPage + "/2)", canvas.width / 2 - 240, 110);
+                
+                let currentGrid = levelPage === 1 ? page1GridBtns : page2GridBtns;
+                for (let i = 0; i < currentGrid.length; i++) {
+                    let lvl = levelPage === 1 ? i + 1 : 11 + i;
+                    let locked = lvl > unlockedLevel;
+                    drawButton(currentGrid[i], "#1e293b", "#334155", "#ffffff", "Seviye " + lvl, "18px", locked);
+                }
+                if (levelPage === 1) drawButton(nextPageBtn, "#00ff66", "#34d399", "#000000", "İLERİ ➡️", "18px");
+                if (levelPage === 2) drawButton(prevPageBtn, "#00ff66", "#34d399", "#000000", "⬅️ GERİ", "18px");
+                drawButton(backToMenuBtn, "#ff3366", "#fb7185", "#ffffff", "ANA EKRAN", "18px");
+                return;
+            }
+
+            if (gameState === 'other_modes') {
+                if (!isBotVsMode) {
+                    ctx.fillStyle = "#00ff66"; ctx.font = "bold 45px Arial"; ctx.fillText("🌀 DİĞER OYUN MODLARI", canvas.width / 2 - 230, 140);
+                    drawButton(trainingModeBtn, "#7209b7", "#9d4edd", "#ffffff", "🎯 EĞİTİM MODU (Ateş Et)", "20px");
+                    drawButton(botVsModeBtn, "#3a86ff", "#4ea8de", "#ffffff", "🤖 BOTA KARŞI SAVAŞ (PvP)", "20px");
+                } else {
+                    if (botVsState === 'select_char') {
+                        ctx.fillStyle = "#ffd700"; ctx.font = "bold 40px Arial"; ctx.fillText("🛡️ SAVAŞÇINI SEÇ", canvas.width / 2 - 160, 180);
+                        drawButton(botHamzaBtn, "#ff3366", "#fb7185", "#ffffff", "Kaptan Hamza", "22px");
+                        drawButton(botAlienBtn, "#2dc653", "#38b000", "#ffffff", "Uzaylı Savaşçı", "22px");
+                        drawButton(botDogBtn, "#ffaa00", "#fbbf24", "#000000", "Süper Köpek", "22px");
+                    } else if (botVsState === 'select_diff') {
+                        ctx.fillStyle = "#ffd700"; ctx.font = "bold 40px Arial"; ctx.fillText("⚡ ZORLUK SEVİYESİ SEÇ", canvas.width / 2 - 210, 180);
+                        drawButton(diffKolayBtn, "#2dc653", "#38b000", "#ffffff", "KOLAY", "22px");
+                        drawButton(diffOrtaBtn, "#ffaa00", "#fbbf24", "#000000", "ORTA", "22px");
+                        drawButton(diffZorBtn, "#ff3366", "#fb7185", "#ffffff", "ZOR", "22px");
+                    }
+                }
+                drawButton(backToMenuBtn, "#ff3366", "#fb7185", "#ffffff", "ANA EKRAN", "18px");
+                return;
+            }
+
             // OYUN İÇİ
-            enemies.forEach(en => { ctx.fillStyle = en.color; ctx.fillRect(en.x, en.y, en.width, en.height); });
+            enemies.forEach(en => { ctx.fillStyle = en.color || "#e63946"; ctx.fillRect(en.x, en.y, en.width, en.height); });
             bullets.forEach(b => { ctx.fillStyle = b.color; ctx.fillRect(b.x, b.y, b.width, b.height); });
             ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
 
@@ -822,17 +778,22 @@
                 ctx.fillRect(touchShootBtn.x, touchShootBtn.y, touchShootBtn.width, touchShootBtn.height);
                 ctx.strokeStyle = "#ff3366"; ctx.strokeRect(touchShootBtn.x, touchShootBtn.y, touchShootBtn.width, touchShootBtn.height);
                 ctx.fillStyle = "#fff"; ctx.font = "bold 22px Arial"; ctx.fillText("🔥 ATEŞ", touchShootBtn.x + 22, touchShootBtn.y + 72);
+
+                if (isTrainingMode || isBotVsMode) {
+                    drawButton(exitTrainingBtn, "#ff3366", "#fb7185", "#ffffff", "ÇIKIŞ (ESC)", "16px");
+                }
             }
 
             if (gameState === 'win') {
-                ctx.fillStyle = "rgba(0, 0, 0, 0.85)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "rgba(0, 0, 0, 0.85);"; ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = "#00ff66"; ctx.font = "bold 58px Arial"; ctx.fillText("SEVİYE TAMAMLANDI!", canvas.width / 2 - 280, canvas.height / 2 - 80);
-                drawButton(restartBtn, "#00ff66", "#34d399", "#000000", "TEKRAR OYNA (R)", "20px");
+                if (!isBotVsMode && currentLevel < 30) drawButton(nextLevelBtn, "#00ff66", "#34d399", "#000000", "SONRAKİ SEVİYE (S)", "20px");
+                drawButton(restartBtn, "#00d2ff", "#38bdf8", "#000000", "TEKRAR OYNA (R)", "20px");
                 drawButton(menuBtn, "#ffaa00", "#fbbf24", "#000000", "ANA EKRAN (M)", "20px");
             }
 
             if (gameState === 'gameover') {
-                ctx.fillStyle = "rgba(0, 0, 0, 0.85)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "rgba(0, 0, 0, 0.85);"; ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = "#ff3366"; ctx.font = "bold 64px Arial"; ctx.fillText("GAME OVER", canvas.width / 2 - 195, canvas.height / 2 - 80);
                 drawButton(restartBtn, "#00d2ff", "#38bdf8", "#000000", "TEKRAR DENE", "22px");
                 drawButton(menuBtn, "#ffaa00", "#fbbf24", "#000000", "ANA EKRAN", "21px");
