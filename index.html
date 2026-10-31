@@ -37,13 +37,12 @@
         let mouseY = 0;
         let keys = {};
 
-        // İSİM GİRİŞ DEĞİŞKENLERİ
         let playerName = "";
         let isNameInputActive = true;
         let nameInputRect = { x: canvas.width / 2 - 200, y: canvas.height / 2 - 20, width: 400, height: 60 };
         let nameSubmitBtn = { x: canvas.width / 2 - 140, y: canvas.height / 2 + 60, width: 280, height: 60 };
 
-        let gameState = 'name_entry'; // 'name_entry', 'start', 'level_select', 'playing', 'win', 'gameover', 'other_modes'
+        let gameState = 'name_entry'; 
         let currentLevel = 1;
         let unlockedLevel = 1;
         let levelPage = 1;
@@ -52,17 +51,101 @@
         let totalCoins = 0;
         let totalWins = 0;
 
+        let stats = {
+            totalEnemiesKilled: 0,
+            totalBulletsFired: 0
+        };
+
+        // OYUNU VE SKORLARI KAYDETME / YÜKLEME (LOCALSTORAGE)
+        function saveGameData() {
+            const gameData = {
+                playerName: playerName,
+                currentLevel: currentLevel,
+                unlockedLevel: unlockedLevel,
+                completedUniqueLevels: completedUniqueLevels,
+                totalCoins: totalCoins,
+                totalWins: totalWins,
+                hasAlienWarrior: hasAlienWarrior,
+                hasDogWarrior: hasDogWarrior,
+                selectedWarrior: selectedWarrior,
+                hasBordoEffect: hasBordoEffect,
+                isBordoEffectEquipped: isBordoEffectEquipped,
+                hasOrangeEffect: hasOrangeEffect,
+                isOrangeEffectEquipped: isOrangeEffectEquipped,
+                hasDoubleShot: hasDoubleShot,
+                isDoubleShotEquipped: isDoubleShotEquipped,
+                hasPoisonBullet: hasPoisonBullet,
+                isPoisonBulletEquipped: isPoisonBulletEquipped,
+                stats: stats,
+                titles: titles
+            };
+            localStorage.setItem("kaptanHamzaUzaySave", JSON.stringify(gameData));
+
+            // GERÇEK OYUNCU SKORUNU GLOBAL LİDERLİK HAVUZUNA KAYDET
+            if (playerName.trim() !== "") {
+                let currentScore = (stats.totalEnemiesKilled * 100) + (totalWins * 500);
+                let allPlayers = JSON.parse(localStorage.getItem("kaptanHamzaGlobalLeaderboard") || "[]");
+                
+                let existingIndex = allPlayers.findIndex(p => p.name === playerName);
+                if (existingIndex !== -1) {
+                    if (currentScore > allPlayers[existingIndex].score) {
+                        allPlayers[existingIndex].score = currentScore;
+                    }
+                } else {
+                    allPlayers.push({ name: playerName, score: currentScore });
+                }
+                localStorage.setItem("kaptanHamzaGlobalLeaderboard", JSON.stringify(allPlayers));
+            }
+        }
+
+        function loadGameData() {
+            const savedData = localStorage.getItem("kaptanHamzaUzaySave");
+            if (savedData) {
+                try {
+                    const data = JSON.parse(savedData);
+                    playerName = data.playerName || "";
+                    currentLevel = data.currentLevel || 1;
+                    unlockedLevel = data.unlockedLevel || 1;
+                    completedUniqueLevels = data.completedUniqueLevels || [];
+                    totalCoins = data.totalCoins || 0;
+                    totalWins = data.totalWins || 0;
+                    hasAlienWarrior = data.hasAlienWarrior || false;
+                    hasDogWarrior = data.hasDogWarrior || false;
+                    selectedWarrior = data.selectedWarrior || 'hamza';
+                    hasBordoEffect = data.hasBordoEffect || false;
+                    isBordoEffectEquipped = data.isBordoEffectEquipped || false;
+                    hasOrangeEffect = data.hasOrangeEffect || false;
+                    isOrangeEffectEquipped = data.isOrangeEffectEquipped || false;
+                    hasDoubleShot = data.hasDoubleShot || false;
+                    isDoubleShotEquipped = data.isDoubleShotEquipped || false;
+                    hasPoisonBullet = data.hasPoisonBullet || false;
+                    isPoisonBulletEquipped = data.isPoisonBulletEquipped || false;
+                    stats = data.stats || { totalEnemiesKilled: 0, totalBulletsFired: 0 };
+                    
+                    if (data.titles) {
+                        data.titles.forEach(savedTitle => {
+                            let t = titles.find(item => item.id === savedTitle.id);
+                            if (t) t.unlocked = savedTitle.unlocked;
+                        });
+                    }
+
+                    if (playerName.trim() !== "") {
+                        gameState = 'start';
+                    }
+                } catch (e) {
+                    console.error("Kayıt yüklenirken hata:", e);
+                }
+            }
+        }
+
+        loadGameData();
+
         let quest1Progress = 0;
         let quest1Completed = false;
         let quest1Claimed = false;
         let quest2Progress = 0;
         let quest2Completed = false;
         let quest2Claimed = false;
-
-        let stats = {
-            totalEnemiesKilled: 0,
-            totalBulletsFired: 0
-        };
 
         let shopCategory = 'efekt';
         let isShopOpen = false;
@@ -348,11 +431,11 @@
         });
 
         window.addEventListener("keydown", (e) => {
-            // İSİM GİRİŞ EKRANINDA TUŞ KONTROLÜ
             if (gameState === 'name_entry') {
                 if (e.key === "Enter") {
                     if (playerName.trim() !== "") {
                         gameState = 'start';
+                        saveGameData();
                     } else {
                         alert("Lütfen geçerli bir isim gir!");
                     }
@@ -446,11 +529,11 @@
         canvas.addEventListener("click", () => {
             if (typeof initAudio === 'function') initAudio();
 
-            // İSİM GİRİŞ EKRANI TIKLAMA
             if (gameState === 'name_entry') {
                 if (isHovered(nameSubmitBtn)) {
                     if (playerName.trim() !== "") {
                         gameState = 'start';
+                        saveGameData();
                     } else {
                         alert("Lütfen geçerli bir isim gir!");
                     }
@@ -511,10 +594,12 @@
                 if (!quest1Claimed && quest1Completed && isHovered(claimQuest1Btn)) {
                     totalCoins += 50;
                     quest1Claimed = true;
+                    saveGameData();
                 }
                 if (!quest2Claimed && quest2Completed && isHovered(claimQuest2Btn)) {
                     totalCoins += 100;
                     quest2Claimed = true;
+                    saveGameData();
                 }
                 return;
             }
@@ -530,6 +615,7 @@
                             totalCoins -= 15000;
                             hasAlienWarrior = true;
                             selectedWarrior = 'alien';
+                            saveGameData();
                         }
                     }
                     if (isHovered(buyDogBtn)) {
@@ -537,6 +623,7 @@
                             totalCoins -= 14000;
                             hasDogWarrior = true;
                             selectedWarrior = 'dog';
+                            saveGameData();
                         }
                     }
                 }
@@ -548,9 +635,11 @@
                                 totalCoins -= 1000;
                                 hasDoubleShot = true;
                                 isDoubleShotEquipped = true;
+                                saveGameData();
                             }
                         } else {
                             isDoubleShotEquipped = !isDoubleShotEquipped;
+                            saveGameData();
                         }
                     }
                     if (isHovered(buyPoisonBulletBtn)) {
@@ -559,9 +648,11 @@
                                 totalCoins -= 1200;
                                 hasPoisonBullet = true;
                                 isPoisonBulletEquipped = true;
+                                saveGameData();
                             }
                         } else {
                             isPoisonBulletEquipped = !isPoisonBulletEquipped;
+                            saveGameData();
                         }
                     }
                 }
@@ -574,10 +665,12 @@
                                 hasBordoEffect = true;
                                 isBordoEffectEquipped = true;
                                 isOrangeEffectEquipped = false;
+                                saveGameData();
                             }
                         } else {
                             isBordoEffectEquipped = !isBordoEffectEquipped;
                             if (isBordoEffectEquipped) isOrangeEffectEquipped = false;
+                            saveGameData();
                         }
                     }
 
@@ -588,10 +681,12 @@
                                 hasOrangeEffect = true;
                                 isOrangeEffectEquipped = true;
                                 isBordoEffectEquipped = false;
+                                saveGameData();
                             }
                         } else {
                             isOrangeEffectEquipped = !isOrangeEffectEquipped;
                             if (isOrangeEffectEquipped) isBordoEffectEquipped = false;
+                            saveGameData();
                         }
                     }
                 }
@@ -603,9 +698,9 @@
             }
 
             if (isWarriorsOpen) {
-                if (isHovered(selectHamzaBtn)) selectedWarrior = 'hamza';
-                if (isHovered(selectAlienBtn) && hasAlienWarrior) selectedWarrior = 'alien';
-                if (isHovered(selectDogBtn) && hasDogWarrior) selectedWarrior = 'dog';
+                if (isHovered(selectHamzaBtn)) { selectedWarrior = 'hamza'; saveGameData(); }
+                if (isHovered(selectAlienBtn) && hasAlienWarrior) { selectedWarrior = 'alien'; saveGameData(); }
+                if (isHovered(selectDogBtn) && hasDogWarrior) { selectedWarrior = 'dog'; saveGameData(); }
 
                 if (isHovered(closeWarriorsBtn)) isWarriorsOpen = false;
                 return;
@@ -745,6 +840,7 @@
                 bullets.push({ x: player.x + player.width / 2 - 3, y: player.y + 20, width: 6, height: 18, color: currentColor, isPoison: isPoison });
                 stats.totalBulletsFired += 1;
             }
+            saveGameData();
         }
 
         function startBotVsBattle() {
@@ -1113,6 +1209,7 @@
                             if (quest2Progress >= 1) quest2Completed = true;
                         }
                     }
+                    saveGameData(); 
                 }
 
                 if (typeof playWinSound === 'function') playWinSound();
@@ -1238,12 +1335,10 @@
         }
 
         function draw() {
-            // İSİM GİRİŞ EKRANI ÇİZİMİ (ŞIK KOYU UZAY TEMASI)
             if (gameState === 'name_entry') {
                 ctx.fillStyle = "#07071a";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                // Yıldız efektleri
                 ctx.fillStyle = "#ffffff";
                 ctx.fillRect(200, 150, 3, 3);
                 ctx.fillRect(800, 300, 2, 2);
@@ -1259,7 +1354,6 @@
                 ctx.font = "bold 24px Arial";
                 ctx.fillText("LÜTFEN KAPTAN İSMİNİ GİR:", canvas.width / 2 - 165, canvas.height / 2 - 80);
 
-                // İsim Kutucuğu
                 ctx.fillStyle = "#1e293b";
                 ctx.fillRect(nameInputRect.x, nameInputRect.y, nameInputRect.width, nameInputRect.height);
                 ctx.strokeStyle = "#00d2ff";
@@ -1270,7 +1364,6 @@
                 ctx.font = "bold 28px Arial";
                 ctx.fillText(playerName + (Math.floor(Date.now() / 500) % 2 === 0 ? "|" : ""), nameInputRect.x + 20, nameInputRect.y + 40);
 
-                // Başla Butonu
                 drawButton(nameSubmitBtn, "#00ff66", "#34d399", "#000000", "MACERAYA BAŞLA", "22px");
 
                 return;
@@ -1353,11 +1446,11 @@
 
                 ctx.fillStyle = "#ffd700";
                 ctx.font = "bold 14px Arial";
-                ctx.fillText("🚀 UZAY İSTASYONU EKLENDİ!", newsBox.x + 10, newsBox.y + 130);
+                ctx.fillText("💾 OTOMATİK KAYIT AKTİF!", newsBox.x + 10, newsBox.y + 130);
                 ctx.fillStyle = "#cccccc";
                 ctx.font = "13px Arial";
-                ctx.fillText("Güneş, Gezegenler & Telsiz", newsBox.x + 10, newsBox.y + 155);
-                ctx.fillText("Haberlerini Keşfet!", newsBox.x + 10, newsBox.y + 175);
+                ctx.fillText("Çıkıp girsen bile kaldığın", newsBox.x + 10, newsBox.y + 155);
+                ctx.fillText("yerden devam edersin!", newsBox.x + 10, newsBox.y + 175);
 
                 drawButton(questsBtn, "#e056fd", "#f368e0", "#ffffff", "🎯 GÜNLÜK GÖREVLER", "18px");
 
@@ -1628,7 +1721,7 @@
 
                     let newsY = 220;
                     const newsItems = [
-                        { title: "🔑 Kaptan İsim Girişi Eklendi!", desc: "Artık oyuna girerken ismini belirleyip kişiselleştirilmiş macerana başlayabilirsin!" }
+                        { title: "🌟 Gerçek Oyuncu Liderlik Tablosu!", desc: "Liderlik tablosu artık oyunu oynayan gerçek oyuncuların skorlarını gösteriyor!" }
                     ];
 
                     newsItems.forEach(item => {
@@ -1827,7 +1920,7 @@
 
                     ctx.fillStyle = "#10b981";
                     ctx.font = "bold 42px Arial";
-                    ctx.fillText("👤 OYUNCU PROFİLİ & LİDERLİK TABLOSU", canvas.width / 2 - 380, 135);
+                    ctx.fillText("👤 OYUNCU PROFİLİ & GERÇEK LİDERLİK TABLOSU", canvas.width / 2 - 430, 135);
 
                     const leftX = 240;
                     ctx.fillStyle = "rgba(16, 185, 129, 0.08)";
@@ -1882,36 +1975,40 @@
 
                     ctx.fillStyle = "#ffd700";
                     ctx.font = "bold 26px Arial";
-                    ctx.fillText("🥇 UZAY LİDERLİK TABLOSU", rightX + 20, 210);
+                    ctx.fillText("🏆 GERÇEK OYUNCULAR SIRALAMASI", rightX + 20, 210);
 
-                    let hamzaScore = (stats.totalEnemiesKilled * 100) + (totalWins * 500);
-
-                    const leaderboardData = [
-                        { rank: "1. 🥇", name: `Kaptan ${playerName} (SEN)`, score: `${hamzaScore} P` },
-                        { rank: "2. 🥈", name: "Göktaşı Avcısı X", score: "4200 P" },
-                        { rank: "3. 🥉", name: "Galaksi Koruyucusu", score: "3100 P" },
-                        { rank: "4. 🎖️", name: "Uzay Şahini", score: "2400 P" },
-                        { rank: "5. 🎖️", name: "Karanlık Lazer", score: "1500 P" }
-                    ];
+                    // Gerçek oyuncu skorlarını çek ve puana göre büyükten küçüğe sırala
+                    let globalPlayers = JSON.parse(localStorage.getItem("kaptanHamzaGlobalLeaderboard") || "[]");
+                    globalPlayers.sort((a, b) => b.score - a.score);
 
                     let lbY = 260;
-                    leaderboardData.forEach(p => {
-                        ctx.fillStyle = p.name.includes("SEN") ? "rgba(0, 255, 102, 0.2)" : "rgba(255, 255, 255, 0.05)";
-                        ctx.fillRect(rightX + 15, lbY, rightWidth - 30, 55);
-                        ctx.strokeStyle = p.name.includes("SEN") ? "#00ff66" : "#444";
-                        ctx.lineWidth = 1.5;
-                        ctx.strokeRect(rightX + 15, lbY, rightWidth - 30, 55);
+                    if (globalPlayers.length === 0) {
+                        ctx.fillStyle = "#ffffff";
+                        ctx.font = "18px Arial";
+                        ctx.fillText("Henüz kayıtlı başka oyuncu yok.", rightX + 30, lbY + 30);
+                    } else {
+                        for (let i = 0; i < Math.min(5, globalPlayers.length); i++) {
+                            let p = globalPlayers[i];
+                            let isMe = p.name === playerName;
+                            let medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "🎖️";
 
-                        ctx.fillStyle = p.name.includes("SEN") ? "#00ff66" : "#ffffff";
-                        ctx.font = "bold 20px Arial";
-                        ctx.fillText(`${p.rank}  ${p.name}`, rightX + 30, lbY + 34);
+                            ctx.fillStyle = isMe ? "rgba(0, 255, 102, 0.2)" : "rgba(255, 255, 255, 0.05)";
+                            ctx.fillRect(rightX + 15, lbY, rightWidth - 30, 55);
+                            ctx.strokeStyle = isMe ? "#00ff66" : "#444";
+                            ctx.lineWidth = 1.5;
+                            ctx.strokeRect(rightX + 15, lbY, rightWidth - 30, 55);
 
-                        ctx.fillStyle = "#ffd700";
-                        ctx.font = "bold 20px Arial";
-                        ctx.fillText(p.score, rightX + rightWidth - 140, lbY + 34);
+                            ctx.fillStyle = isMe ? "#00ff66" : "#ffffff";
+                            ctx.font = "bold 20px Arial";
+                            ctx.fillText(`${i + 1}. ${medal}  ${p.name} ${isMe ? "(SEN)" : ""}`, rightX + 30, lbY + 34);
 
-                        lbY += 70;
-                    });
+                            ctx.fillStyle = "#ffd700";
+                            ctx.font = "bold 20px Arial";
+                            ctx.fillText(`${p.score} P`, rightX + rightWidth - 120, lbY + 34);
+
+                            lbY += 70;
+                        }
+                    }
 
                     drawButton(closeProfileBtn, "#ff3366", "#fb7185", "#ffffff", "KAPAT", "20px");
                 }
@@ -2025,7 +2122,7 @@
                     const lineHeight = 42;
                     ctx.fillText("🎮  KONTROLLER: Sol/Sağ ok tuşları ile hareket.", 250, startY);
                     ctx.fillText("🚀  ATEŞ ETME: Boşluk (Space) tuşuyla lazer fırlat.", 250, startY + lineHeight);
-                    ctx.fillText("⌨️  HIZLI GEÇİŞ: Zafer ekranında (S) tuşuna basarak hızlıca ilerle.", 250, startY + lineHeight * 2);
+                    ctx.fillText("💾  OTOMATİK KAYIT: Çıkıp girsen bile kaldığın yerden devam edersin.", 250, startY + lineHeight * 2);
 
                     drawButton(closeHelpBtn, "#a855f7", "#c084fc", "#ffffff", "ANLADIM", "20px");
                 }
