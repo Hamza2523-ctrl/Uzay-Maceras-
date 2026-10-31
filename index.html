@@ -2,6 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Uzay Oyunu</title>
     <style>
         body {
@@ -11,10 +12,12 @@
             font-family: Arial, sans-serif;
             overflow: hidden;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
             width: 100vw;
+            touch-action: none;
         }
         canvas {
             display: block;
@@ -56,7 +59,14 @@
             totalBulletsFired: 0
         };
 
-        // OYUNU VE SKORLARI KAYDETME / YÜKLEME (LOCALSTORAGE)
+        // DOKUNMATİK KONTROL BUTONLARI (TELEFON İÇİN)
+        const touchLeftBtn = { x: 50, y: canvas.height - 180, width: 130, height: 130 };
+        const touchRightBtn = { x: 200, y: canvas.height - 180, width: 130, height: 130 };
+        const touchShootBtn = { x: canvas.width - 180, y: canvas.height - 180, width: 130, height: 130 };
+
+        let touchLeftActive = false;
+        let touchRightActive = false;
+
         function saveGameData() {
             const gameData = {
                 playerName: playerName,
@@ -81,7 +91,6 @@
             };
             localStorage.setItem("kaptanHamzaUzaySave", JSON.stringify(gameData));
 
-            // GERÇEK OYUNCU SKORUNU GLOBAL LİDERLİK HAVUZUNA KAYDET
             if (playerName.trim() !== "") {
                 let currentScore = (stats.totalEnemiesKilled * 100) + (totalWins * 500);
                 let allPlayers = JSON.parse(localStorage.getItem("kaptanHamzaGlobalLeaderboard") || "[]");
@@ -392,6 +401,10 @@
             return mouseX >= btn.x && mouseX <= btn.x + btn.width && mouseY >= btn.y && mouseY <= btn.y + btn.height;
         }
 
+        function isTouched(btn, tx, ty) {
+            return tx >= btn.x && tx <= btn.x + btn.width && ty >= btn.y && ty <= btn.y + btn.height;
+        }
+
         function drawWrappedText(text, x, y, maxWidth, lineHeight, defaultColor, highlightColor) {
             let paragraphs = text.split('\n');
             let currentY = y;
@@ -429,6 +442,72 @@
             mouseX = (e.clientX - rect.left) * scaleX;
             mouseY = (e.clientY - rect.top) * scaleY;
         });
+
+        // DOKUNMATİK (TOUCH) OLAYLARI
+        canvas.addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            touchLeftActive = false;
+            touchRightActive = false;
+
+            for (let i = 0; i < e.touches.length; i++) {
+                let tx = (e.touches[i].clientX - rect.left) * scaleX;
+                let ty = (e.touches[i].clientY - rect.top) * scaleY;
+                mouseX = tx;
+                mouseY = ty;
+
+                if (gameState === 'playing') {
+                    if (isTouched(touchLeftBtn, tx, ty)) touchLeftActive = true;
+                    if (isTouched(touchRightBtn, tx, ty)) touchRightActive = true;
+                    if (isTouched(touchShootBtn, tx, ty)) shoot();
+                }
+            }
+
+            handleCanvasClickOrTouch();
+        }, { passive: false });
+
+        canvas.addEventListener("touchmove", (e) => {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            touchLeftActive = false;
+            touchRightActive = false;
+
+            for (let i = 0; i < e.touches.length; i++) {
+                let tx = (e.touches[i].clientX - rect.left) * scaleX;
+                let ty = (e.touches[i].clientY - rect.top) * scaleY;
+
+                if (gameState === 'playing') {
+                    if (isTouched(touchLeftBtn, tx, ty)) touchLeftActive = true;
+                    if (isTouched(touchRightBtn, tx, ty)) touchRightActive = true;
+                }
+            }
+        }, { passive: false });
+
+        canvas.addEventListener("touchend", (e) => {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            touchLeftActive = false;
+            touchRightActive = false;
+
+            for (let i = 0; i < e.touches.length; i++) {
+                let tx = (e.touches[i].clientX - rect.left) * scaleX;
+                let ty = (e.touches[i].clientY - rect.top) * scaleY;
+
+                if (gameState === 'playing') {
+                    if (isTouched(touchLeftBtn, tx, ty)) touchLeftActive = true;
+                    if (isTouched(touchRightBtn, tx, ty)) touchRightActive = true;
+                }
+            }
+        }, { passive: false });
 
         window.addEventListener("keydown", (e) => {
             if (gameState === 'name_entry') {
@@ -526,7 +605,7 @@
             keys[e.code] = false;
         });
 
-        canvas.addEventListener("click", () => {
+        function handleCanvasClickOrTouch() {
             if (typeof initAudio === 'function') initAudio();
 
             if (gameState === 'name_entry') {
@@ -814,6 +893,10 @@
                 }
                 if (isHovered(menuBtn)) goToMainMenu();
             }
+        }
+
+        canvas.addEventListener("click", () => {
+            handleCanvasClickOrTouch();
         });
 
         function shoot() {
@@ -1110,8 +1193,13 @@
                 }
             }
 
-            if (keys["ArrowLeft"] && player.x > 0) player.x -= player.speed;
-            if (keys["ArrowRight"] && player.x < canvas.width - player.width) player.x += player.speed;
+            // HAREKET KONTROLÜ (KLAVYE VEYA DOKUNMATİK)
+            if ((keys["ArrowLeft"] || touchLeftActive) && player.x > 0) {
+                player.x -= player.speed;
+            }
+            if ((keys["ArrowRight"] || touchRightActive) && player.x < canvas.width - player.width) {
+                player.x += player.speed;
+            }
 
             for (let i = bullets.length - 1; i >= 0; i--) {
                 bullets[i].y -= bulletSpeed;
@@ -1446,11 +1534,11 @@
 
                 ctx.fillStyle = "#ffd700";
                 ctx.font = "bold 14px Arial";
-                ctx.fillText("💾 OTOMATİK KAYIT AKTİF!", newsBox.x + 10, newsBox.y + 130);
+                ctx.fillText("📱 TELEFON UYUMLU EKLENDİ!", newsBox.x + 10, newsBox.y + 130);
                 ctx.fillStyle = "#cccccc";
                 ctx.font = "13px Arial";
-                ctx.fillText("Çıkıp girsen bile kaldığın", newsBox.x + 10, newsBox.y + 155);
-                ctx.fillText("yerden devam edersin!", newsBox.x + 10, newsBox.y + 175);
+                ctx.fillText("Artık mobilden de rahatça", newsBox.x + 10, newsBox.y + 155);
+                ctx.fillText("oynayabilirsin!", newsBox.x + 10, newsBox.y + 175);
 
                 drawButton(questsBtn, "#e056fd", "#f368e0", "#ffffff", "🎯 GÜNLÜK GÖREVLER", "18px");
 
@@ -1721,7 +1809,7 @@
 
                     let newsY = 220;
                     const newsItems = [
-                        { title: "🌟 Gerçek Oyuncu Liderlik Tablosu!", desc: "Liderlik tablosu artık oyunu oynayan gerçek oyuncuların skorlarını gösteriyor!" }
+                        { title: "📱 Mobil Dokunmatik Kontroller Eklendi!", desc: "Artık telefondan oynarken ekrandaki sol, sağ ve ateş butonlarını kullanabilirsin!" }
                     ];
 
                     newsItems.forEach(item => {
@@ -1977,7 +2065,6 @@
                     ctx.font = "bold 26px Arial";
                     ctx.fillText("🏆 GERÇEK OYUNCULAR SIRALAMASI", rightX + 20, 210);
 
-                    // Gerçek oyuncu skorlarını çek ve puana göre büyükten küçüğe sırala
                     let globalPlayers = JSON.parse(localStorage.getItem("kaptanHamzaGlobalLeaderboard") || "[]");
                     globalPlayers.sort((a, b) => b.score - a.score);
 
@@ -2120,9 +2207,9 @@
                     ctx.font = "21px Arial";
                     let startY = 240;
                     const lineHeight = 42;
-                    ctx.fillText("🎮  KONTROLLER: Sol/Sağ ok tuşları ile hareket.", 250, startY);
-                    ctx.fillText("🚀  ATEŞ ETME: Boşluk (Space) tuşuyla lazer fırlat.", 250, startY + lineHeight);
-                    ctx.fillText("💾  OTOMATİK KAYIT: Çıkıp girsen bile kaldığın yerden devam edersin.", 250, startY + lineHeight * 2);
+                    ctx.fillText("🎮  KONTROLLER: Bilgisayar için Ok Tuşları / Telefon için Ekran Butonları.", 250, startY);
+                    ctx.fillText("🚀  ATEŞ ETME: Space tuşu veya ekrandaki ATEŞ butonu.", 250, startY + lineHeight);
+                    ctx.fillText("📱  MOBİL: Telefon ekranındaki sanal butonlarla rahatça oynayabilirsin.", 250, startY + lineHeight * 2);
 
                     drawButton(closeHelpBtn, "#a855f7", "#c084fc", "#ffffff", "ANLADIM", "20px");
                 }
@@ -2310,6 +2397,39 @@
             } else {
                 ctx.fillStyle = "#00d2ff";
                 ctx.fillRect(player.x, player.y, player.width, player.height);
+            }
+
+            // OYUN İÇİ EKRANDA MOBİL DOKUNMATİK BUTONLARI ÇİZ
+            if (gameState === 'playing') {
+                // Sol Buton
+                ctx.fillStyle = touchLeftActive ? "rgba(0, 210, 255, 0.6)" : "rgba(0, 210, 255, 0.25)";
+                ctx.fillRect(touchLeftBtn.x, touchLeftBtn.y, touchLeftBtn.width, touchLeftBtn.height);
+                ctx.strokeStyle = "#00d2ff";
+                ctx.lineWidth = 3;
+                ctx.strokeRect(touchLeftBtn.x, touchLeftBtn.y, touchLeftBtn.width, touchLeftBtn.height);
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "bold 45px Arial";
+                ctx.fillText("⬅️", touchLeftBtn.x + 22, touchLeftBtn.y + 82);
+
+                // Sağ Buton
+                ctx.fillStyle = touchRightActive ? "rgba(0, 210, 255, 0.6)" : "rgba(0, 210, 255, 0.25)";
+                ctx.fillRect(touchRightBtn.x, touchRightBtn.y, touchRightBtn.width, touchRightBtn.height);
+                ctx.strokeStyle = "#00d2ff";
+                ctx.lineWidth = 3;
+                ctx.strokeRect(touchRightBtn.x, touchRightBtn.y, touchRightBtn.width, touchRightBtn.height);
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "bold 45px Arial";
+                ctx.fillText("➡️", touchRightBtn.x + 22, touchRightBtn.y + 82);
+
+                // Ateş Et Butonu
+                ctx.fillStyle = "rgba(255, 51, 102, 0.35)";
+                ctx.fillRect(touchShootBtn.x, touchShootBtn.y, touchShootBtn.width, touchShootBtn.height);
+                ctx.strokeStyle = "#ff3366";
+                ctx.lineWidth = 3;
+                ctx.strokeRect(touchShootBtn.x, touchShootBtn.y, touchShootBtn.width, touchShootBtn.height);
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "bold 22px Arial";
+                ctx.fillText("🔥 ATEŞ", touchShootBtn.x + 22, touchShootBtn.y + 72);
             }
 
             ctx.fillStyle = "#ffffff";
