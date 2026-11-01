@@ -371,7 +371,7 @@
                     const data = JSON.parse(savedData);
                     playerName = data.playerName || "";
                     currentLevel = data.currentLevel || 1;
-                    unlockedLevel = data.unlockedLevel || 1;
+                    unlockedLevel = data.unlockedLevel || 1; // Kayıttan yüklenen açık seviye
                     completedUniqueLevels = data.completedUniqueLevels || [];
                     totalCoins = data.totalCoins || 0;
                     totalWins = data.totalWins || 0;
@@ -695,6 +695,7 @@
                     for (let i = 0; i < page1GridBtns.length; i++) {
                         if (isHovered(page1GridBtns[i])) {
                             let clickedLvl = i + 1;
+                            // 11. seviye ve sonrası henüz yapım aşamasında uyarısı
                             if (clickedLvl >= 11) {
                                 alert("⚠️ Bu seviye henüz yapım aşamasında!");
                             } else if (clickedLvl <= unlockedLevel) {
@@ -841,6 +842,7 @@
                     { x: 1050, y: 100, width: 85, height: 60, hp: 25, maxHp: 25, dx: 1.4, shootTimer: 0, shootInterval: 320, bulletColor: "#00f0ff", bulletSpeed: 2.0, color: "#0077b6" }
                 ];
             } else {
+                // Diğer seviyeler için genel standart düşmanlar
                 enemies = [
                     { x: 400, y: 110, width: 80, height: 55, hp: 20 + level * 5, maxHp: 20 + level * 5, dx: 1.5, shootTimer: 0, shootInterval: 300, bulletColor: "#ff3333", bulletSpeed: 2.0, color: "#e63946" }
                 ];
@@ -923,6 +925,7 @@
                         if (currentLevel === 10) titles.find(t => t.id === 'ay_dede').unlocked = true;
                         if (!completedUniqueLevels.includes(currentLevel)) completedUniqueLevels.push(currentLevel);
                         
+                        // Bir sonraki seviyenin kilidini aç
                         if (currentLevel === unlockedLevel && unlockedLevel < 30) {
                             unlockedLevel++;
                         }
@@ -1044,16 +1047,17 @@
                 if (isProfileOpen) {
                     ctx.fillStyle = "rgba(0, 20, 15, 0.96)"; ctx.fillRect(200, 70, canvas.width - 400, canvas.height - 140);
                     ctx.strokeStyle = "#10b981"; ctx.lineWidth = 4; ctx.strokeRect(200, 70, canvas.width - 400, canvas.height - 140);
-                    ctx.fillStyle = "#10b981"; ctx.font = "bold 42px Arial"; ctx.fillText("👤 PROFİL & BİLGİLER", canvas.width / 2 - 200, 135);
+                    ctx.fillStyle = "#10b981"; ctx.font = "bold 42px Arial"; ctx.fillText("👤 PROFİL & LİDERLİK", canvas.width / 2 - 220, 135);
 
                     ctx.fillStyle = "#ffffff"; ctx.font = "18px Arial";
                     ctx.fillText(`• Oyuncu Adı: ${playerName}`, 265, 250);
                     ctx.fillText(`• Vurulan Düşman: ${stats.totalEnemiesKilled}`, 265, 280);
                     ctx.fillText(`• Kazanılan Maç: ${totalWins}`, 265, 310);
 
-                    // Sıralama kaldırıldı, istenen yazı eklendi
-                    ctx.fillStyle = "#ffd700"; ctx.font = "bold 22px Arial";
-                    ctx.fillText("buraya yakında bir şey eklenecek :)", 265, 370);
+                    // Puan 0'dan başlar, oynadıkça artar
+                    let hamzaScore = (stats.totalEnemiesKilled * 100) + (totalWins * 500);
+                    ctx.fillStyle = "#ffd700"; ctx.font = "bold 24px Arial";
+                    ctx.fillText(`🏆 Güncel Puanın: ${hamzaScore} P`, 265, 370);
 
                     drawButton(closeProfileBtn, "#ff3366", "#fb7185", "#ffffff", "KAPAT", "20px");
                 }
@@ -1067,6 +1071,7 @@
                 let currentGrid = levelPage === 1 ? page1GridBtns : page2GridBtns;
                 for (let i = 0; i < currentGrid.length; i++) {
                     let lvl = levelPage === 1 ? i + 1 : 11 + i;
+                    // SADECE UNLOCKEDLEVEL KADARKİ KISIM AÇIK, DİĞERLERİ KİLİTLİ
                     let isLocked = (lvl > unlockedLevel);
                     drawButton(currentGrid[i], "#1e293b", "#334155", "#ffffff", isLocked ? `🔒 ${lvl}` : `Seviye ${lvl}`, "16px", isLocked);
                 }
@@ -1081,6 +1086,7 @@
                 return;
             }
 
+            // OYUN İÇİ ÇİZİMLERİ
             enemies.forEach(en => { ctx.fillStyle = en.color || "#e63946"; ctx.fillRect(en.x, en.y, en.width, en.height); });
             bullets.forEach(b => { ctx.fillStyle = b.color; ctx.fillRect(b.x, b.y, b.width, b.height); });
             enemyBullets.forEach(eb => { ctx.fillStyle = eb.color; ctx.fillRect(eb.x, eb.y, eb.size, eb.size); });
