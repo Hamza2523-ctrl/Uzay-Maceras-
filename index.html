@@ -134,25 +134,19 @@
         ];
 
         const celestialData = {
-            gunes: { name: "⭐ GÜNEŞ (Sistemin Kalbi)", info: "Güneş, Güneş Sistemi'nin merkezinde yer alan devasa bir yıldızdır.\n\n💡 OYUN İPUCU: Güneş'in enerjisi kalkan sağlar!" },
-            merkur: { name: "🪐 MERKÜR (En İçteki Gezegen)", info: "Güneş'e en yakın gezegendir. Yüzeyi aşırı sıcak ve kraterlerle doludur." },
-            venus: { name: "🪐 VENÜS (Sıcak Cehennem)", info: "Güneş sisteminin en sıcak gezegenidir. Kalın atmosferi zehirli gazlardan oluşur." },
-            dunya: { name: "🌍 DÜNYA (Evimiz)", info: "Üzerinde su barındıran, yaşamın olduğu bilinen tek gezegendir." },
-            ay: { name: "🌕 AY (Dünya'nın Uydusu)", info: "Dünya'nın tek doğal uydusudur. 10. Seviyeden sonra maceralar burada başlar!" },
-            mars: { name: "🔴 MARS (Kızıl Gezegen)", info: "Paslı demir toprakları yüzünden kırmızı görünür." },
-            jupiter: { name: "⚡ JÜPİTER (Dev Gaz Devi)", info: "Sistemin en büyük gezegenidir." },
-            saturn: { name: "💫 SATÜRN (Halkaların Efendisi)", info: "Buz ve kayalardan oluşan muhteşem halkalarıyla ünlüdür." },
-            uranus: { name: "❄️ URANÜS (Buz Devi)", info: "Yan yatmış bir varil gibi kendi etrafında dönen soğuk bir gaz devidir." },
-            neptun: { name: "🌀 Neptün", info: "Şiddetli rüzgarların estiği masmavi gezegendir." }
+            gunes: { name: "⭐ GÜNEŞ (Sistemin Kalbi)", info: "Güneş, Güneş Sistemi'nin merkezinde yer alan devasa bir yıldızdır." },
+            merkur: { name: "🪐 MERKÜR (En İçteki Gezegen)", info: "Güneş'e en yakın gezegendir." },
+            venus: { name: "🪐 VENÜS (Sıcak Cehennem)", info: "Güneş sisteminin en sıcak gezegenidir." },
+            dunya: { name: "🌍 DÜNYA (Evimiz)", info: "Üzerinde su barındıran tek gezegendir." },
+            ay: { name: "🌕 AY", info: "Dünya'nın tek doğal uydusudur." }
         };
 
         let radioMessages = [
             "📡 MERKEZ: Kaptan, radarımızda yeni düşman sinyalleri var!",
             "📡 MERKEZ: Akçe kasalarını toplamayı unutma pilot!",
-            "📡 TELSİZ: Ay üssünden bildiriyoruz, yerçekimi düşük dikkat et.",
-            "📡 MERKEZ: Dükkandaki özel güçler savaşta hayat kurtarır!"
+            "📡 TELSİZ: Ay üssünden bildiriyoruz."
         ];
-        let currentRadioText = "📡 Telsiz açık. Haberler bekleniyor...";
+        let currentRadioText = "📡 Telsiz açık...";
 
         const startBtn = { x: canvas.width / 2 - 130, y: canvas.height / 2 + 60, width: 260, height: 70 };
         const warriorsBtn = { x: canvas.width / 2 - 130, y: canvas.height / 2 + 145, width: 260, height: 65 };
@@ -166,12 +160,7 @@
             { id: 'merkur', name: '🪐 Merkür', x: 500, y: 220, width: 220, height: 55 },
             { id: 'venus', name: '🪐 Venüs', x: 740, y: 220, width: 220, height: 55 },
             { id: 'dunya', name: '🌍 Dünya', x: 980, y: 220, width: 220, height: 55 },
-            { id: 'ay', name: '🌕 Ay', x: 1220, y: 220, width: 120, height: 55 },
-            { id: 'mars', name: '🔴 Mars', x: 260, y: 295, width: 220, height: 55 },
-            { id: 'jupiter', name: '⚡ Jüpiter', x: 500, y: 295, width: 220, height: 55 },
-            { id: 'saturn', name: '💫 Satürn', x: 740, y: 295, width: 220, height: 55 },
-            { id: 'uranus', name: '❄️ Uranüs', x: 980, y: 295, width: 220, height: 55 },
-            { id: 'neptun', name: '🌀 Neptün', x: 1220, y: 295, width: 120, height: 55 }
+            { id: 'ay', name: '🌕 Ay', x: 1220, y: 220, width: 120, height: 55 }
         ];
 
         const radioBtn = { x: canvas.width / 2 - 120, y: canvas.height / 2 + 200, width: 240, height: 50 };
@@ -181,14 +170,6 @@
         const trainingModeBtn = { x: canvas.width / 2 - 170, y: canvas.height / 2 - 50, width: 340, height: 65 };
         const botVsModeBtn = { x: canvas.width / 2 - 210, y: canvas.height / 2 + 30, width: 420, height: 65 };
         const exitTrainingBtn = { x: canvas.width - 180, y: 25, width: 145, height: 45 };
-
-        const botHamzaBtn = { x: canvas.width / 2 - 420, y: canvas.height / 2 - 60, width: 240, height: 75 };
-        const botAlienBtn = { x: canvas.width / 2 - 120, y: canvas.height / 2 - 60, width: 240, height: 75 };
-        const botDogBtn = { x: canvas.width / 2 + 180, y: canvas.height / 2 - 60, width: 240, height: 75 };
-
-        const diffKolayBtn = { x: canvas.width / 2 - 360, y: canvas.height / 2 - 30, width: 220, height: 70 };
-        const diffOrtaBtn = { x: canvas.width / 2 - 110, y: canvas.height / 2 - 30, width: 220, height: 70 };
-        const diffZorBtn = { x: canvas.width / 2 + 140, y: canvas.height / 2 - 30, width: 220, height: 70 };
 
         const profileBtn = { x: 45, y: 45, width: 160, height: 50 };
         const shopBtn = { x: 45, y: canvas.height - 90, width: 160, height: 50 };
@@ -267,6 +248,8 @@
 
         window.addEventListener("keydown", (e) => {
             if (gameState === 'name_entry') return;
+            keys[e.code] = true;
+
             if (isShopOpen || isWarriorsOpen || isHelpOpen || isProfileOpen || isNewsOpen || isQuestsOpen || isUniverseMapOpen || isTitlesOpen || isSpaceStationOpen || selectedCelestialBody) {
                 if (e.code === "Escape") {
                     if (selectedCelestialBody) selectedCelestialBody = null;
@@ -292,8 +275,9 @@
                 else if (e.code === "KeyM") goToMainMenu();
                 return;
             }
-            if (e.code === "Space" && !keys["Space"] && gameState === 'playing') shoot();
-            keys[e.code] = true;
+            if (e.code === "Space" && gameState === 'playing') {
+                shoot();
+            }
         });
 
         window.addEventListener("keyup", (e) => { keys[e.code] = false; });
@@ -325,20 +309,6 @@
                         if (!hasDoubleShot && totalCoins >= 1000) { totalCoins -= 1000; hasDoubleShot = true; isDoubleShotEquipped = true; saveGameData(); }
                         else if (hasDoubleShot) { isDoubleShotEquipped = !isDoubleShotEquipped; saveGameData(); }
                     }
-                    if (isHovered(buyPoisonBulletBtn)) {
-                        if (!hasPoisonBullet && totalCoins >= 1200) { totalCoins -= 1200; hasPoisonBullet = true; isPoisonBulletEquipped = true; saveGameData(); }
-                        else if (hasPoisonBullet) { isPoisonBulletEquipped = !isPoisonBulletEquipped; saveGameData(); }
-                    }
-                }
-                if (shopCategory === 'efekt') {
-                    if (isHovered(buyBordoEffectBtn)) {
-                        if (!hasBordoEffect && totalCoins >= 550) { totalCoins -= 550; hasBordoEffect = true; isBordoEffectEquipped = true; isOrangeEffectEquipped = false; saveGameData(); }
-                        else if (hasBordoEffect) { isBordoEffectEquipped = !isBordoEffectEquipped; if(isBordoEffectEquipped) isOrangeEffectEquipped = false; saveGameData(); }
-                    }
-                    if (isHovered(buyOrangeEffectBtn)) {
-                        if (!hasOrangeEffect && totalCoins >= 250) { totalCoins -= 250; hasOrangeEffect = true; isOrangeEffectEquipped = true; isBordoEffectEquipped = false; saveGameData(); }
-                        else if (hasOrangeEffect) { isOrangeEffectEquipped = !isOrangeEffectEquipped; if(isOrangeEffectEquipped) isBordoEffectEquipped = false; saveGameData(); }
-                    }
                 }
                 if (isHovered(closeShopBtn)) isShopOpen = false;
                 return;
@@ -369,21 +339,8 @@
                 if (!isBotVsMode) {
                     if (isHovered(trainingModeBtn)) { isTrainingMode = true; startPlaying(1); }
                     if (isHovered(botVsModeBtn)) { isBotVsMode = true; botVsState = 'select_char'; }
-                } else {
-                    if (botVsState === 'select_char') {
-                        if (isHovered(botHamzaBtn)) { selectedBotCharacter = 'hamza'; botVsState = 'select_diff'; }
-                        if (isHovered(botAlienBtn)) { selectedBotCharacter = 'alien'; botVsState = 'select_diff'; }
-                        if (isHovered(botDogBtn)) { selectedBotCharacter = 'dog'; botVsState = 'select_diff'; }
-                    } else if (botVsState === 'select_diff') {
-                        if (isHovered(diffKolayBtn)) { botDifficulty = 'kolay'; startBotVsBattle(); }
-                        if (isHovered(diffOrtaBtn)) { botDifficulty = 'orta'; startBotVsBattle(); }
-                        if (isHovered(diffZorBtn)) { botDifficulty = 'zor'; startBotVsBattle(); }
-                    }
                 }
-                if (isHovered(backToMenuBtn)) {
-                    if (isBotVsMode && botVsState === 'select_diff') botVsState = 'select_char';
-                    else { isBotVsMode = false; gameState = 'start'; }
-                }
+                if (isHovered(backToMenuBtn)) { isBotVsMode = false; gameState = 'start'; }
             } else if (gameState === 'level_select') {
                 isTrainingMode = false; isBotVsMode = false;
                 if (isHovered(nextPageBtn) && levelPage === 1) { levelPage = 2; return; }
@@ -418,25 +375,9 @@
 
         function shoot() {
             let col = isBordoEffectEquipped ? "#800020" : isOrangeEffectEquipped ? "#ff7b00" : "#00f0ff";
-            let isP = false;
-            if (isPoisonBulletEquipped && isPoisonActive) { col = "#00ff66"; isP = true; isPoisonActive = false; }
-            if (isDoubleShotEquipped) {
-                bullets.push({ x: player.x + 20, y: player.y + 20, width: 6, height: 18, color: col, isPoison: isP });
-                bullets.push({ x: player.x + player.width - 26, y: player.y + 20, width: 6, height: 18, color: col, isPoison: isP });
-                stats.totalBulletsFired += 2;
-            } else {
-                bullets.push({ x: player.x + player.width / 2 - 3, y: player.y + 20, width: 6, height: 18, color: col, isPoison: isP });
-                stats.totalBulletsFired += 1;
-            }
+            bullets.push({ x: player.x + player.width / 2 - 3, y: player.y + 20, width: 6, height: 18, color: col });
+            stats.totalBulletsFired += 1;
             saveGameData();
-        }
-
-        function startBotVsBattle() {
-            isBotVsMode = true; gameState = 'playing';
-            player.x = canvas.width / 2 - playerWidth / 2; player.y = canvas.height - playerHeight - 25;
-            player.maxHp = selectedWarrior === 'dog' ? 85 : selectedWarrior === 'alien' ? 105 : 100;
-            player.hp = player.maxHp; player.speed = selectedWarrior === 'dog' ? 12 : 9;
-            bullets = []; initEnemies(1);
         }
 
         function startPlaying(level) {
@@ -444,41 +385,18 @@
             player.x = canvas.width / 2 - playerWidth / 2; player.y = canvas.height - playerHeight - 25;
             player.maxHp = selectedWarrior === 'dog' ? 85 : selectedWarrior === 'alien' ? 105 : 100;
             player.hp = player.maxHp; player.speed = selectedWarrior === 'dog' ? 12 : 9;
-            bullets = []; initEnemies(currentLevel);
+            bullets = []; 
+            enemies = [{ x: 400, y: 110, width: 80, height: 55, hp: 10 + level * 5, maxHp: 10 + level * 5, dx: 1.5 + level * 0.2, color: "#e63946" }];
             gameState = 'playing';
         }
 
         function goToMainMenu() {
             bullets = []; enemies = [];
-            isTrainingMode = false; isBotVsMode = false; botVsState = 'select_char'; gameState = 'start';
-        }
-
-        function initEnemies(level) {
-            enemies = [];
-            if (isBotVsMode) {
-                let hp = selectedBotCharacter === 'alien' ? 105 : selectedBotCharacter === 'dog' ? 85 : 100;
-                let spd = botDifficulty === 'kolay' ? 3.5 : botDifficulty === 'orta' ? 5.5 : 7.5;
-                enemies = [{ x: canvas.width / 2 - 45, y: 110, width: 90, height: 110, hp: hp, maxHp: hp, dx: spd, speed: spd, color: "#e63946", isBotEnemy: true, aiDecisionTimer: 0, targetX: canvas.width / 2 - 45 }];
-                return;
-            }
-            if (isTrainingMode) {
-                enemies = [{ x: canvas.width / 2 - 42, y: 100, width: 85, height: 60, hp: 1000, maxHp: 1000, dx: 2, color: "#7209b7" }];
-                return;
-            }
-            enemies = [{ x: 400, y: 110, width: 80, height: 55, hp: 10 + level * 5, maxHp: 10 + level * 5, dx: 1.5 + level * 0.2, color: "#e63946" }];
+            isTrainingMode = false; isBotVsMode = false; gameState = 'start';
         }
 
         function update() {
             if (gameState !== 'playing' || isShopOpen || isWarriorsOpen || isHelpOpen || isProfileOpen || isNewsOpen || isQuestsOpen || isUniverseMapOpen || isTitlesOpen || isSpaceStationOpen || selectedCelestialBody) return;
-
-            if (poisonTimer > 0) {
-                poisonTimer--; poisonTickTimer++;
-                if (poisonTickTimer >= 60 && enemies.length > 0) {
-                    enemies[0].hp -= 2;
-                    if (enemies[0].hp <= 0) { stats.totalEnemiesKilled++; enemies.splice(0, 1); }
-                    poisonTickTimer = 0;
-                }
-            }
 
             if (keys["ArrowLeft"] && player.x > 0) player.x -= player.speed;
             if (keys["ArrowRight"] && player.x < canvas.width - player.width) player.x += player.speed;
@@ -489,8 +407,7 @@
                 for (let j = enemies.length - 1; j >= 0; j--) {
                     let en = enemies[j];
                     if (bullets[i] && bullets[i].x < en.x + en.width && bullets[i].x + bullets[i].width > en.x && bullets[i].y < en.y + en.height && bullets[i].y + bullets[i].height > en.y) {
-                        en.hp -= 1; if (bullets[i].isPoison) { poisonTimer = 240; poisonTickTimer = 0; }
-                        hit = true;
+                        en.hp -= 1; hit = true;
                         if (en.hp <= 0) { stats.totalEnemiesKilled++; enemies.splice(j, 1); }
                         break;
                     }
@@ -515,15 +432,8 @@
             }
 
             enemies.forEach(en => {
-                if (en.isBotEnemy) {
-                    en.aiDecisionTimer++;
-                    if (en.aiDecisionTimer > 60) { en.targetX = Math.max(50, Math.min(canvas.width - en.width - 50, player.x + (Math.random() * 200 - 100))); en.aiDecisionTimer = 0; }
-                    if (en.x < en.targetX) en.x = Math.min(en.targetX, en.x + en.speed);
-                    else if (en.x > en.targetX) en.x = Math.max(en.targetX, en.x - en.speed);
-                } else {
-                    en.x += en.dx;
-                    if (en.x <= 20 || en.x + en.width >= canvas.width - 20) en.dx *= -1;
-                }
+                en.x += en.dx;
+                if (en.x <= 20 || en.x + en.width >= canvas.width - 20) en.dx *= -1;
             });
         }
 
@@ -573,12 +483,17 @@
 
                 drawButton(questsBtn, "#e056fd", "#f368e0", "#ffffff", "🎯 GÖREVLER", "18px");
 
-                ctx.fillStyle = "#00d2ff"; ctx.font = "bold 60px Arial";
+                // NEON PARILTI EFEKTİ (Kaptan Hamza Yazısı)
+                ctx.shadowColor = "#00f0ff";
+                ctx.shadowBlur = 20;
+                ctx.fillStyle = "#00d2ff"; 
+                ctx.font = "bold 60px Arial";
                 ctx.fillText("KAPTAN " + playerName.toUpperCase(), canvas.width / 2 - 280, 230);
+                ctx.shadowBlur = 0; // Efekti sıfırla
+
                 drawButton(warriorsBtn, "#ffaa00", "#fbbf24", "#000000", "🛡️ SAVAŞÇILAR", "22px");
                 drawButton(startBtn, "#ff3366", "#fb7185", "#ffffff", "OYUNA BAŞLA", "24px");
 
-                // PENCERELER
                 if (isProfileOpen) {
                     ctx.fillStyle = "rgba(0, 20, 15, 0.98)"; ctx.fillRect(150, 70, canvas.width - 300, canvas.height - 140);
                     ctx.strokeStyle = "#10b981"; ctx.lineWidth = 4; ctx.strokeRect(150, 70, canvas.width - 300, canvas.height - 140);
@@ -588,117 +503,6 @@
                     ctx.fillText("Kazanılan Zafer: " + totalWins, 220, 260);
                     ctx.fillText("Vurulan Düşman: " + stats.totalEnemiesKilled, 220, 310);
                     drawButton(closeProfileBtn, "#ff3366", "#fb7185", "#ffffff", "KAPAT", "20px");
-                }
-                if (isShopOpen) {
-                    ctx.fillStyle = "rgba(0, 15, 30, 0.98)"; ctx.fillRect(150, 70, canvas.width - 300, canvas.height - 140);
-                    ctx.strokeStyle = "#00d2ff"; ctx.lineWidth = 4; ctx.strokeRect(150, 70, canvas.width - 300, canvas.height - 140);
-                    ctx.fillStyle = "#00d2ff"; ctx.font = "bold 30px Arial"; ctx.fillText("🛒 GALAKTİK DÜKKAN", canvas.width / 2 - 150, 130);
-                    drawButton(catEfektBtn, shopCategory === 'efekt' ? "#00f0ff" : "#1e293b", "#38bdf8", shopCategory === 'efekt' ? "#000" : "#fff", "Lazer Efektleri", "17px");
-                    drawButton(catOzelGucBtn, shopCategory === 'ozel_guc' ? "#00f0ff" : "#1e293b", "#38bdf8", shopCategory === 'ozel_guc' ? "#000" : "#fff", "Özel Güçler", "17px");
-                    drawButton(catSavasciBtn, shopCategory === 'savasci' ? "#00f0ff" : "#1e293b", "#38bdf8", shopCategory === 'savasci' ? "#000" : "#fff", "Savaşçılar", "17px");
-                    
-                    if (shopCategory === 'efekt') {
-                        ctx.fillStyle = "#fff"; ctx.font = "20px Arial";
-                        ctx.fillText("Bordo Lazer Efekti (550 Akçe): " + (hasBordoEffect ? "SAHİPSİN" : "AL"), 200, 350);
-                        drawButton(buyBordoEffectBtn, "#00ff66", "#34d399", "#000", hasBordoEffect ? (isBordoEffectEquipped ? "KULLANIMDA" : "KUŞAN") : "SATIN AL", "16px");
-                    } else if (shopCategory === 'ozel_guc') {
-                        ctx.fillStyle = "#fff"; ctx.font = "20px Arial";
-                        ctx.fillText("Çift Atış (1000 Akçe): " + (hasDoubleShot ? "SAHİPSİN" : "AL"), 200, 310);
-                        drawButton(buyDoubleShotBtn, "#00ff66", "#34d399", "#000", hasDoubleShot ? (isDoubleShotEquipped ? "AKTİF" : "AÇ") : "SATIN AL", "16px");
-                    } else if (shopCategory === 'savasci') {
-                        ctx.fillStyle = "#fff"; ctx.font = "20px Arial";
-                        ctx.fillText("Uzaylı Savaşçı (15000 Akçe): " + (hasAlienWarrior ? "SAHİPSİN" : "AL"), 200, 330);
-                        drawButton(buyAlienBtn, "#00ff66", "#34d399", "#000", hasAlienWarrior ? "AÇIK" : "SATIN AL", "16px");
-                    }
-                    drawButton(closeShopBtn, "#ff3366", "#fb7185", "#ffffff", "KAPAT", "20px");
-                }
-                if (isWarriorsOpen) {
-                    ctx.fillStyle = "rgba(20, 15, 0, 0.98)"; ctx.fillRect(150, 70, canvas.width - 300, canvas.height - 140);
-                    ctx.strokeStyle = "#ffaa00"; ctx.lineWidth = 4; ctx.strokeRect(150, 70, canvas.width - 300, canvas.height - 140);
-                    ctx.fillStyle = "#ffaa00"; ctx.font = "bold 30px Arial"; ctx.fillText("🛡️ SAVAŞÇI SEÇİMİ", canvas.width / 2 - 140, 130);
-                    ctx.drawImage(playerImg, 300, 220, 100, 115);
-                    drawButton(selectHamzaBtn, selectedWarrior === 'hamza' ? "#00ff66" : "#334155", "#34d399", "#000", selectedWarrior === 'hamza' ? "SEÇİLİ" : "SEÇ", "16px");
-                    if (hasAlienWarrior) {
-                        ctx.drawImage(alienImg, 675, 220, 100, 115);
-                        drawButton(selectAlienBtn, selectedWarrior === 'alien' ? "#00ff66" : "#334155", "#34d399", "#000", selectedWarrior === 'alien' ? "SEÇİLİ" : "SEÇ", "16px");
-                    }
-                    if (hasDogWarrior) {
-                        ctx.drawImage(dogImg, 1050, 220, 100, 115);
-                        drawButton(selectDogBtn, selectedWarrior === 'dog' ? "#00ff66" : "#334155", "#34d399", "#000", selectedWarrior === 'dog' ? "SEÇİLİ" : "SEÇ", "16px");
-                    }
-                    drawButton(closeWarriorsBtn, "#ff3366", "#fb7185", "#ffffff", "KAPAT", "20px");
-                }
-                if (isHelpOpen) {
-                    ctx.fillStyle = "rgba(20, 0, 30, 0.98)"; ctx.fillRect(150, 70, canvas.width - 300, canvas.height - 140);
-                    ctx.strokeStyle = "#a855f7"; ctx.lineWidth = 4; ctx.strokeRect(150, 70, canvas.width - 300, canvas.height - 140);
-                    ctx.fillStyle = "#a855f7"; ctx.font = "bold 30px Arial"; ctx.fillText("❓ OYUN YARDIMI & KONTROLLER", canvas.width / 2 - 220, 130);
-                    ctx.fillStyle = "#fff"; ctx.font = "20px Arial";
-                    ctx.fillText("• Sol / Sağ Ok Tuşları: Uzay gemisini hareket ettirir.", 220, 210);
-                    ctx.fillText("• Boşluk Tuşu: Lazer atışı yapar.", 220, 260);
-                    drawButton(closeHelpBtn, "#ff3366", "#fb7185", "#ffffff", "KAPAT", "20px");
-                }
-                if (isNewsOpen) {
-                    ctx.fillStyle = "rgba(10, 20, 30, 0.98)"; ctx.fillRect(150, 70, canvas.width - 300, canvas.height - 140);
-                    ctx.strokeStyle = "#00d2ff"; ctx.lineWidth = 4; ctx.strokeRect(150, 70, canvas.width - 300, canvas.height - 140);
-                    ctx.fillStyle = "#00d2ff"; ctx.font = "bold 30px Arial"; ctx.fillText("📰 GALAKTİK HABERLER", canvas.width / 2 - 160, 130);
-                    ctx.fillStyle = "#fff"; ctx.font = "20px Arial";
-                    ctx.fillText("• Yeni özel güçler dükkandaki yerini aldı!", 220, 220);
-                    drawButton(closeNewsBtn, "#ff3366", "#fb7185", "#ffffff", "KAPAT", "20px");
-                }
-                if (isQuestsOpen) {
-                    ctx.fillStyle = "rgba(30, 10, 30, 0.98)"; ctx.fillRect(150, 70, canvas.width - 300, canvas.height - 140);
-                    ctx.strokeStyle = "#e056fd"; ctx.lineWidth = 4; ctx.strokeRect(150, 70, canvas.width - 300, canvas.height - 140);
-                    ctx.fillStyle = "#e056fd"; ctx.font = "bold 30px Arial"; ctx.fillText("🎯 GÜNLÜK GÖREVLER", canvas.width / 2 - 150, 130);
-                    ctx.fillStyle = "#fff"; ctx.font = "20px Arial";
-                    ctx.fillText("• 10 Düşman Yok Et (" + Math.min(10, stats.totalEnemiesKilled) + "/10)", 220, 220);
-                    drawButton(closeQuestsBtn, "#ff3366", "#fb7185", "#ffffff", "KAPAT", "20px");
-                }
-                if (isUniverseMapOpen) {
-                    ctx.fillStyle = "rgba(10, 10, 40, 0.98)"; ctx.fillRect(150, 70, canvas.width - 300, canvas.height - 140);
-                    ctx.strokeStyle = "#3a86ff"; ctx.lineWidth = 4; ctx.strokeRect(150, 70, canvas.width - 300, canvas.height - 140);
-                    ctx.fillStyle = "#3a86ff"; ctx.font = "bold 30px Arial"; ctx.fillText("🌌 GİDİLEN GEZEGENLER", canvas.width / 2 - 160, 130);
-                    ctx.fillStyle = "#fff"; ctx.font = "20px Arial";
-                    let mapY = 200;
-                    completedUniqueLevels.forEach(lvl => {
-                        ctx.fillText("• Seviye " + lvl + " Bölgesi Keşfedildi", 220, mapY);
-                        mapY += 40;
-                    });
-                    drawButton(closeUniverseMapBtn, "#ff3366", "#fb7185", "#ffffff", "KAPAT", "20px");
-                }
-                if (isTitlesOpen) {
-                    ctx.fillStyle = "rgba(40, 10, 20, 0.98)"; ctx.fillRect(150, 70, canvas.width - 300, canvas.height - 140);
-                    ctx.strokeStyle = "#f72585"; ctx.lineWidth = 4; ctx.strokeRect(150, 70, canvas.width - 300, canvas.height - 140);
-                    ctx.fillStyle = "#f72585"; ctx.font = "bold 30px Arial"; ctx.fillText("🎖️ KAPTAN ÜNVANLARI", canvas.width / 2 - 150, 130);
-                    let tY = 200;
-                    titles.forEach(t => {
-                        ctx.fillStyle = t.unlocked ? "#00ff66" : "#888";
-                        ctx.font = "bold 20px Arial";
-                        ctx.fillText(`${t.name} - ${t.desc} (${t.unlocked ? "AÇIK" : "KİLİTLİ"})`, 220, tY);
-                        tY += 50;
-                    });
-                    drawButton(closeTitlesBtn, "#ff3366", "#fb7185", "#ffffff", "KAPAT", "20px");
-                }
-                if (isSpaceStationOpen) {
-                    ctx.fillStyle = "rgba(0, 30, 20, 0.98)"; ctx.fillRect(150, 70, canvas.width - 300, canvas.height - 140);
-                    ctx.strokeStyle = "#00ff66"; ctx.lineWidth = 4; ctx.strokeRect(150, 70, canvas.width - 300, canvas.height - 140);
-                    ctx.fillStyle = "#00ff66"; ctx.font = "bold 30px Arial"; ctx.fillText("🚀 UZAY İSTASYONU & RADAR", canvas.width / 2 - 200, 110);
-                    
-                    celestialButtons.forEach(btn => { drawButton(btn, "#1e293b", "#334155", "#fff", btn.name, "15px"); });
-                    drawButton(radioBtn, "#3a86ff", "#4ea8de", "#fff", "📡 TELSİZİ DİNLE", "18px");
-                    
-                    ctx.fillStyle = "#ffd700"; ctx.font = "18px Arial"; ctx.fillText(currentRadioText, canvas.width / 2 - 280, canvas.height / 2 + 130);
-                    drawButton(closeSpaceStationBtn, "#ff3366", "#fb7185", "#ffffff", "KAPAT", "20px");
-
-                    if (selectedCelestialBody) {
-                        ctx.fillStyle = "rgba(0, 0, 0, 0.95)"; ctx.fillRect(350, 200, canvas.width - 700, 400);
-                        ctx.strokeStyle = "#ffd700"; ctx.lineWidth = 3; ctx.strokeRect(350, 200, canvas.width - 700, 400);
-                        ctx.fillStyle = "#ffd700"; ctx.font = "bold 26px Arial"; ctx.fillText(selectedCelestialBody.name, 400, 260);
-                        ctx.fillStyle = "#fff"; ctx.font = "20px Arial";
-                        let lines = selectedCelestialBody.info.split('\n');
-                        let lY = 320;
-                        lines.forEach(l => { ctx.fillText(l, 400, lY); lY += 35; });
-                        drawButton(closeInfoCardBtn, "#ff3366", "#fb7185", "#ffffff", "TAMAM", "18px");
-                    }
                 }
                 return;
             }
@@ -722,7 +526,6 @@
             if (gameState === 'other_modes') {
                 ctx.fillStyle = "#00ff66"; ctx.font = "bold 45px Arial"; ctx.fillText("🌀 DİĞER OYUN MODLARI", canvas.width / 2 - 230, 140);
                 drawButton(trainingModeBtn, "#7209b7", "#9d4edd", "#ffffff", "🎯 EĞİTİM MODU (Ateş Et)", "20px");
-                drawButton(botVsModeBtn, "#3a86ff", "#4ea8de", "#ffffff", "🤖 BOTA KARŞI SAVAŞ (PvP)", "20px");
                 drawButton(backToMenuBtn, "#ff3366", "#fb7185", "#ffffff", "ANA EKRAN", "18px");
                 return;
             }
