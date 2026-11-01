@@ -56,11 +56,6 @@
         let totalCoins = 0, totalWins = 0;
         let stats = { totalEnemiesKilled: 0, totalBulletsFired: 0 };
 
-        const touchLeftBtn = { x: 50, y: canvas.height - 180, width: 130, height: 130 };
-        const touchRightBtn = { x: 200, y: canvas.height - 180, width: 130, height: 130 };
-        const touchShootBtn = { x: canvas.width - 180, y: canvas.height - 180, width: 130, height: 130 };
-        let touchLeftActive = false, touchRightActive = false;
-
         function saveGameData() {
             const gameData = {
                 playerName, currentLevel, unlockedLevel, completedUniqueLevels,
@@ -110,7 +105,6 @@
                 } catch (e) {}
             }
         }
-        loadGameData();
 
         let shopCategory = 'efekt';
         let isShopOpen = false, isWarriorsOpen = false, isHelpOpen = false, isProfileOpen = false, isNewsOpen = false, isQuestsOpen = false, isUniverseMapOpen = false, isTitlesOpen = false, isSpaceStationOpen = false;
@@ -130,11 +124,8 @@
         let player = { x: canvas.width / 2 - playerWidth / 2, y: canvas.height - playerHeight - 25, width: playerWidth, height: playerHeight, speed: 9, hp: 100, maxHp: 100 };
 
         let bullets = [], bulletSpeed = 12, enemies = [], enemyBullets = [], apples = [];
-        let lastAppleTime = Date.now(), isBossSpawned = false;
 
         const playerImg = new Image(); playerImg.src = 'astronot_11.png';
-        const alienImg = new Image(); alienImg.src = 'Uzaylı.png';
-        const dogImg = new Image(); dogImg.src = 'köpek_3.png';
 
         const titles = [
             { id: 'novice', name: '🌌 Çırak Uzaycı', desc: 'Oyuna ilk adımını atan cesur pilot.', unlocked: true },
@@ -143,23 +134,22 @@
         ];
 
         const celestialData = {
-            gunes: { name: "⭐ GÜNEŞ (Sistemin Kalbi)", info: "Güneş, Güneş Sistemi'nin merkezinde yer alan devasa bir yıldızdır.\n\n💡 OYUN İPUCU: Güneş'in enerjisi kalkan sağlar!" },
+            gunes: { name: "⭐ GÜNEŞ (Sistemin Kalbi)", info: "Güneş, Güneş Sistemi'nin merkezinde yer alan devasa bir yıldızdır." },
             merkur: { name: "🪐 MERKÜR (En İçteki Gezegen)", info: "Güneş'e en yakın gezegendir. Yüzeyi aşırı sıcak ve kraterlerle doludur." },
-            venus: { name: "🪐 VENÜS (Sıcak Cehennem)", info: "Güneş sisteminin en sıcak gezegenidir. Kalın atmosferi zehirli gazlardan oluşur." },
+            venus: { name: "🪐 VENÜS (Sıcak Cehennem)", info: "Güneş sisteminin en sıcak gezegenidir. Kalın atmosferi var." },
             dunya: { name: "🌍 DÜNYA (Evimiz)", info: "Üzerinde su barındıran, yaşamın olduğu bilinen tek gezegendir." },
-            ay: { name: "🌕 AY (Dünya'nın Uydusu)", info: "Dünya'nın tek doğal uydusudur. 10. Seviyeden sonra maceralar burada başlar!" },
+            ay: { name: "🌕 AY (Dünya'nın Uydusu)", info: "Dünya'nın tek doğal uydusudur." },
             mars: { name: "🔴 MARS (Kızıl Gezegen)", info: "Paslı demir toprakları yüzünden kırmızı görünür." },
             jupiter: { name: "⚡ JÜPİTER (Dev Gaz Devi)", info: "Sistemin en büyük gezegenidir." },
             saturn: { name: "💫 SATÜRN (Halkaların Efendisi)", info: "Buz ve kayalardan oluşan muhteşem halkalarıyla ünlüdür." },
-            uranus: { name: "❄️ URANÜS (Buz Devi)", info: "Yan yatmış bir varil gibi kendi etrafında dönen soğuk bir gaz devidir." },
-            neptun: { name: "🌀 Neptün", info: "Şiddetli rüzgarların estiği masmavi gezegendir." }
+            uranus: { name: "❄️ URANÜS (Buz Devi)", info: "Yan yatmış bir varil gibi kendi etrafında döner." },
+            neptun: { name: "🌀 NEPTÜN", info: "Şiddetli rüzgarların estiği masmavi gezegendir." }
         };
 
         let radioMessages = [
             "📡 MERKEZ: Kaptan, radarımızda yeni düşman sinyalleri var!",
             "📡 MERKEZ: Akçe kasalarını toplamayı unutma pilot!",
-            "📡 TELSİZ: Ay üssünden bildiriyoruz, yerçekimi düşük dikkat et.",
-            "📡 MERKEZ: Dükkandaki özel güçler savaşta hayat kurtarır!"
+            "📡 TELSİZ: Ay üssünden bildiriyoruz, yerçekimi düşük dikkat et."
         ];
         let currentRadioText = "📡 Telsiz açık. Haberler bekleniyor...";
 
@@ -175,12 +165,7 @@
             { id: 'merkur', name: '🪐 Merkür', x: 500, y: 220, width: 220, height: 55 },
             { id: 'venus', name: '🪐 Venüs', x: 740, y: 220, width: 220, height: 55 },
             { id: 'dunya', name: '🌍 Dünya', x: 980, y: 220, width: 220, height: 55 },
-            { id: 'ay', name: '🌕 Ay', x: 1220, y: 220, width: 120, height: 55 },
-            { id: 'mars', name: '🔴 Mars', x: 260, y: 295, width: 220, height: 55 },
-            { id: 'jupiter', name: '⚡ Jüpiter', x: 500, y: 295, width: 220, height: 55 },
-            { id: 'saturn', name: '💫 Satürn', x: 740, y: 295, width: 220, height: 55 },
-            { id: 'uranus', name: '❄️ Uranüs', x: 980, y: 295, width: 220, height: 55 },
-            { id: 'neptun', name: '🌀 Neptün', x: 1220, y: 295, width: 120, height: 55 }
+            { id: 'ay', name: '🌕 Ay', x: 1220, y: 220, width: 120, height: 55 }
         ];
 
         const radioBtn = { x: canvas.width / 2 - 120, y: canvas.height / 2 + 200, width: 240, height: 50 };
@@ -254,7 +239,6 @@
         const menuBtn = { x: canvas.width / 2 - 135, y: canvas.height / 2 + 100, width: 270, height: 55 };
 
         function isHovered(btn) { return mouseX >= btn.x && mouseX <= btn.x + btn.width && mouseY >= btn.y && mouseY <= btn.y + btn.height; }
-        function isTouched(btn, tx, ty) { return tx >= btn.x && tx <= btn.x + btn.width && ty >= btn.y && ty <= btn.y + btn.height; }
 
         function handleNameSubmission() {
             let enteredName = hiddenInput.value.trim();
@@ -272,40 +256,6 @@
             mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
             mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
         });
-
-        canvas.addEventListener("touchstart", (e) => {
-            e.preventDefault();
-            const rect = canvas.getBoundingClientRect();
-            let scaleX = canvas.width / rect.width, scaleY = canvas.height / rect.height;
-            touchLeftActive = false; touchRightActive = false;
-            for (let i = 0; i < e.touches.length; i++) {
-                let tx = (e.touches[i].clientX - rect.left) * scaleX, ty = (e.touches[i].clientY - rect.top) * scaleY;
-                mouseX = tx; mouseY = ty;
-                if (gameState === 'playing') {
-                    if (isTouched(touchLeftBtn, tx, ty)) touchLeftActive = true;
-                    if (isTouched(touchRightBtn, tx, ty)) touchRightActive = true;
-                    if (isTouched(touchShootBtn, tx, ty)) shoot();
-                }
-            }
-            if (gameState === 'name_entry') hiddenInput.focus();
-            handleCanvasClickOrTouch();
-        }, { passive: false });
-
-        canvas.addEventListener("touchmove", (e) => {
-            e.preventDefault();
-            const rect = canvas.getBoundingClientRect();
-            let scaleX = canvas.width / rect.width, scaleY = canvas.height / rect.height;
-            touchLeftActive = false; touchRightActive = false;
-            for (let i = 0; i < e.touches.length; i++) {
-                let tx = (e.touches[i].clientX - rect.left) * scaleX, ty = (e.touches[i].clientY - rect.top) * scaleY;
-                if (gameState === 'playing') {
-                    if (isTouched(touchLeftBtn, tx, ty)) touchLeftActive = true;
-                    if (isTouched(touchRightBtn, tx, ty)) touchRightActive = true;
-                }
-            }
-        }, { passive: false });
-
-        canvas.addEventListener("touchend", () => { touchLeftActive = false; touchRightActive = false; }, { passive: false });
 
         window.addEventListener("keydown", (e) => {
             if (gameState === 'name_entry') return;
@@ -363,30 +313,6 @@
                 if (isHovered(catEfektBtn)) shopCategory = 'efekt';
                 if (isHovered(catOzelGucBtn)) shopCategory = 'ozel_guc';
                 if (isHovered(catSavasciBtn)) shopCategory = 'savasci';
-                if (shopCategory === 'savasci') {
-                    if (isHovered(buyAlienBtn) && !hasAlienWarrior && totalCoins >= 15000) { totalCoins -= 15000; hasAlienWarrior = true; selectedWarrior = 'alien'; saveGameData(); }
-                    if (isHovered(buyDogBtn) && !hasDogWarrior && totalCoins >= 14000) { totalCoins -= 14000; hasDogWarrior = true; selectedWarrior = 'dog'; saveGameData(); }
-                }
-                if (shopCategory === 'ozel_guc') {
-                    if (isHovered(buyDoubleShotBtn)) {
-                        if (!hasDoubleShot && totalCoins >= 1000) { totalCoins -= 1000; hasDoubleShot = true; isDoubleShotEquipped = true; saveGameData(); }
-                        else if (hasDoubleShot) { isDoubleShotEquipped = !isDoubleShotEquipped; saveGameData(); }
-                    }
-                    if (isHovered(buyPoisonBulletBtn)) {
-                        if (!hasPoisonBullet && totalCoins >= 1200) { totalCoins -= 1200; hasPoisonBullet = true; isPoisonBulletEquipped = true; saveGameData(); }
-                        else if (hasPoisonBullet) { isPoisonBulletEquipped = !isPoisonBulletEquipped; saveGameData(); }
-                    }
-                }
-                if (shopCategory === 'efekt') {
-                    if (isHovered(buyBordoEffectBtn)) {
-                        if (!hasBordoEffect && totalCoins >= 550) { totalCoins -= 550; hasBordoEffect = true; isBordoEffectEquipped = true; isOrangeEffectEquipped = false; saveGameData(); }
-                        else if (hasBordoEffect) { isBordoEffectEquipped = !isBordoEffectEquipped; if(isBordoEffectEquipped) isOrangeEffectEquipped = false; saveGameData(); }
-                    }
-                    if (isHovered(buyOrangeEffectBtn)) {
-                        if (!hasOrangeEffect && totalCoins >= 250) { totalCoins -= 250; hasOrangeEffect = true; isOrangeEffectEquipped = true; isBordoEffectEquipped = false; saveGameData(); }
-                        else if (hasOrangeEffect) { isOrangeEffectEquipped = !isOrangeEffectEquipped; if(isOrangeEffectEquipped) isBordoEffectEquipped = false; saveGameData(); }
-                    }
-                }
                 if (isHovered(closeShopBtn)) isShopOpen = false;
                 return;
             }
@@ -437,11 +363,19 @@
                 if (isHovered(prevPageBtn) && levelPage === 2) { levelPage = 1; return; }
                 if (levelPage === 1) {
                     for (let i = 0; i < page1GridBtns.length; i++) {
-                        if (isHovered(page1GridBtns[i])) { let lvl = i + 1; if (lvl <= unlockedLevel) startPlaying(lvl); else alert("⚠️ Kilitli!"); }
+                        if (isHovered(page1GridBtns[i])) { 
+                            let lvl = i + 1; 
+                            if (lvl <= unlockedLevel) startPlaying(lvl); 
+                            else alert("⚠️ Kilitli! Önceki seviyeyi kazanmalısın."); 
+                        }
                     }
                 } else if (levelPage === 2) {
                     for (let i = 0; i < page2GridBtns.length; i++) {
-                        if (isHovered(page2GridBtns[i])) { let lvl = 11 + i; if (lvl <= unlockedLevel && completedUniqueLevels.includes(10)) startPlaying(lvl); else alert("⚠️ 10. Seviyeyi bitirmelisin!"); }
+                        if (isHovered(page2GridBtns[i])) { 
+                            let lvl = 11 + i; 
+                            if (lvl <= unlockedLevel) startPlaying(lvl); 
+                            else alert("⚠️ Kilitli! Önceki seviyeyi kazanmalısın."); 
+                        }
                     }
                 }
                 if (isHovered(backToMenuBtn)) gameState = 'start';
@@ -458,77 +392,50 @@
         canvas.addEventListener("click", () => { handleCanvasClickOrTouch(); });
 
         function shoot() {
-            let col = isBordoEffectEquipped ? "#800020" : isOrangeEffectEquipped ? "#ff7b00" : "#00f0ff";
-            let isP = false;
-            if (isPoisonBulletEquipped && isPoisonActive) { col = "#00ff66"; isP = true; isPoisonActive = false; }
-            if (isDoubleShotEquipped) {
-                bullets.push({ x: player.x + 20, y: player.y + 20, width: 6, height: 18, color: col, isPoison: isP });
-                bullets.push({ x: player.x + player.width - 26, y: player.y + 20, width: 6, height: 18, color: col, isPoison: isP });
-                stats.totalBulletsFired += 2;
-            } else {
-                bullets.push({ x: player.x + player.width / 2 - 3, y: player.y + 20, width: 6, height: 18, color: col, isPoison: isP });
-                stats.totalBulletsFired += 1;
-            }
+            let col = "#00f0ff";
+            bullets.push({ x: player.x + player.width / 2 - 3, y: player.y + 20, width: 6, height: 18, color: col });
+            stats.totalBulletsFired += 1;
             saveGameData();
         }
 
         function startBotVsBattle() {
             isBotVsMode = true; gameState = 'playing';
             player.x = canvas.width / 2 - playerWidth / 2; player.y = canvas.height - playerHeight - 25;
-            player.maxHp = selectedWarrior === 'dog' ? 85 : selectedWarrior === 'alien' ? 105 : 100;
-            player.hp = player.maxHp; player.speed = selectedWarrior === 'dog' ? 12 : 9;
-            bullets = []; enemyBullets = []; apples = []; initEnemies(1);
+            player.hp = 100; player.speed = 9;
+            bullets = []; enemies = []; initEnemies(1);
         }
 
         function startPlaying(level) {
             currentLevel = level; isBotVsMode = false;
             player.x = canvas.width / 2 - playerWidth / 2; player.y = canvas.height - playerHeight - 25;
-            player.maxHp = selectedWarrior === 'dog' ? 85 : selectedWarrior === 'alien' ? 105 : 100;
-            player.hp = player.maxHp; player.speed = selectedWarrior === 'dog' ? 12 : 9;
-            bullets = []; enemyBullets = []; apples = []; lastAppleTime = Date.now();
-            isBossSpawned = false; initEnemies(currentLevel);
+            player.hp = 100; player.speed = 9;
+            bullets = []; enemies = []; initEnemies(currentLevel);
             gameState = 'playing';
         }
 
         function goToMainMenu() {
-            player.hp = player.maxHp; bullets = []; enemyBullets = []; apples = [];
+            player.hp = 100; bullets = [];
             isTrainingMode = false; isBotVsMode = false; botVsState = 'select_char'; gameState = 'start';
         }
 
         function initEnemies(level) {
             enemies = [];
             if (isBotVsMode) {
-                let hp = selectedBotCharacter === 'alien' ? 105 : selectedBotCharacter === 'dog' ? 85 : 100;
-                let spd = botDifficulty === 'kolay' ? 3.5 : botDifficulty === 'orta' ? 5.5 : 7.5;
-                let inter = botDifficulty === 'kolay' ? 420 : botDifficulty === 'orta' ? 280 : 150;
-                enemies = [{ x: canvas.width / 2 - 45, y: 110, width: 90, height: 110, hp: hp, maxHp: hp, dx: spd, speed: spd, shootTimer: 0, shootInterval: inter, bulletColor: "#ff3333", bulletSpeed: 3.5, color: "#e63946", isBotEnemy: true, botCharType: selectedBotCharacter, aiDecisionTimer: 0, targetX: canvas.width / 2 - 45 }];
+                enemies = [{ x: canvas.width / 2 - 45, y: 110, width: 90, height: 110, hp: 100, maxHp: 100, dx: 4, speed: 4, color: "#e63946", isBotEnemy: true, aiDecisionTimer: 0, targetX: canvas.width / 2 - 45 }];
                 return;
             }
             if (isTrainingMode) {
-                enemies = [
-                    { x: 150, y: 100, width: 85, height: 60, hp: 1000, maxHp: 1000, dx: 1.8, shootTimer: 0, shootInterval: 99999, bulletColor: "#000", bulletSpeed: 0, color: "#7209b7" },
-                    { x: 500, y: 150, width: 85, height: 60, hp: 1000, maxHp: 1000, dx: -1.8, shootTimer: 0, shootInterval: 99999, bulletColor: "#000", bulletSpeed: 0, color: "#7209b7" }
-                ];
+                enemies = [{ x: canvas.width / 2 - 42, y: 100, width: 85, height: 60, hp: 1000, maxHp: 1000, dx: 2, color: "#7209b7" }];
                 return;
             }
-            if (level === 1) enemies = [{ x: 400, y: 110, width: 80, height: 55, hp: 15, maxHp: 15, dx: 1.2, shootTimer: 0, shootInterval: 350, bulletColor: "#ff3333", bulletSpeed: 1.8, color: "#e63946" }];
-            else enemies = [{ x: 400, y: 110, width: 80, height: 55, hp: 20 + level * 3, maxHp: 20 + level * 3, dx: 1.5, shootTimer: 0, shootInterval: 300, bulletColor: "#00f0ff", bulletSpeed: 2.0, color: "#0077b6" }];
+            enemies = [{ x: 400, y: 110, width: 80, height: 55, hp: 10 + level * 5, maxHp: 10 + level * 5, dx: 1.5 + level * 0.2, color: "#e63946" }];
         }
 
         function update() {
             if (gameState !== 'playing' || isShopOpen || isWarriorsOpen || isHelpOpen || isProfileOpen || isNewsOpen || isQuestsOpen || isUniverseMapOpen || isTitlesOpen || isSpaceStationOpen || selectedCelestialBody) return;
 
-            if (poisonTimer > 0) {
-                poisonTimer--; poisonTickTimer++;
-                if (poisonTickTimer >= 60 && enemies.length > 0) {
-                    enemies[0].hp -= 2;
-                    if (enemies[0].hp <= 0) { stats.totalEnemiesKilled++; enemies.splice(0, 1); }
-                    poisonTickTimer = 0;
-                }
-            }
-
-            if ((keys["ArrowLeft"] || touchLeftActive) && player.x > 0) player.x -= player.speed;
-            if ((keys["ArrowRight"] || touchRightActive) && player.x < canvas.width - player.width) player.x += player.speed;
+            if (keys["ArrowLeft"] && player.x > 0) player.x -= player.speed;
+            if (keys["ArrowRight"] && player.x < canvas.width - player.width) player.x += player.speed;
 
             for (let i = bullets.length - 1; i >= 0; i--) {
                 bullets[i].y -= bulletSpeed;
@@ -536,8 +443,7 @@
                 for (let j = enemies.length - 1; j >= 0; j--) {
                     let en = enemies[j];
                     if (bullets[i] && bullets[i].x < en.x + en.width && bullets[i].x + bullets[i].width > en.x && bullets[i].y < en.y + en.height && bullets[i].y + bullets[i].height > en.y) {
-                        en.hp -= 1; if (bullets[i].isPoison) { poisonTimer = 240; poisonTickTimer = 0; }
-                        hit = true;
+                        en.hp -= 1; hit = true;
                         if (en.hp <= 0) { stats.totalEnemiesKilled++; enemies.splice(j, 1); }
                         break;
                     }
@@ -550,9 +456,6 @@
                     totalCoins += currentLevel * 10;
                     totalWins++;
                     if (!isBotVsMode) {
-                        if (currentLevel === 5) titles.find(t => t.id === 'boss_slayer').unlocked = true;
-                        if (currentLevel === 10) titles.find(t => t.id === 'ay_dede').unlocked = true;
-                        if (!completedUniqueLevels.includes(currentLevel)) completedUniqueLevels.push(currentLevel);
                         if (currentLevel === unlockedLevel) unlockedLevel++;
                     }
                     saveGameData();
@@ -562,15 +465,8 @@
             }
 
             enemies.forEach(en => {
-                if (en.isBotEnemy) {
-                    en.aiDecisionTimer++;
-                    if (en.aiDecisionTimer > 60) { en.targetX = Math.max(50, Math.min(canvas.width - en.width - 50, player.x + (Math.random() * 200 - 100))); en.aiDecisionTimer = 0; }
-                    if (en.x < en.targetX) en.x = Math.min(en.targetX, en.x + en.speed);
-                    else if (en.x > en.targetX) en.x = Math.max(en.targetX, en.x - en.speed);
-                } else {
-                    en.x += en.dx;
-                    if (en.x <= 20 || en.x + en.width >= canvas.width - 20) en.dx *= -1;
-                }
+                en.x += en.dx;
+                if (en.x <= 20 || en.x + en.width >= canvas.width - 20) en.dx *= -1;
             });
         }
 
@@ -592,15 +488,11 @@
                 ctx.fillStyle = "#00d2ff"; ctx.font = "bold 60px Arial";
                 ctx.fillText("🚀 UZAY MACERASI", canvas.width / 2 - 270, canvas.height / 2 - 180);
                 ctx.fillStyle = "#ffffff"; ctx.font = "bold 24px Arial";
-                ctx.fillText("KAPTAN İSMİNİ GİR (Telefonda dokunman yeterli):", canvas.width / 2 - 275, canvas.height / 2 - 100);
+                ctx.fillText("KAPTAN İSMİNİ GİR:", canvas.width / 2 - 150, canvas.height / 2 - 100);
                 ctx.fillStyle = "#1e293b"; ctx.fillRect(nameInputRect.x, nameInputRect.y, nameInputRect.width, nameInputRect.height);
                 ctx.strokeStyle = "#00d2ff"; ctx.lineWidth = 3; ctx.strokeRect(nameInputRect.x, nameInputRect.y, nameInputRect.width, nameInputRect.height);
                 ctx.fillStyle = "#ffd700"; ctx.font = "bold 28px Arial";
                 ctx.fillText(playerName + (Math.floor(Date.now() / 500) % 2 === 0 ? "|" : ""), nameInputRect.x + 20, nameInputRect.y + 40);
-                if (nameErrorMsg !== "") {
-                    ctx.fillStyle = "#ff3366"; ctx.font = "bold 18px Arial";
-                    ctx.fillText(nameErrorMsg, canvas.width / 2 - 200, canvas.height / 2 + 35);
-                }
                 drawButton(nameSubmitBtn, "#00ff66", "#34d399", "#000000", "MACERAYA BAŞLA", "22px");
                 return;
             }
@@ -634,13 +526,10 @@
                     ctx.strokeStyle = "#10b981"; ctx.lineWidth = 4; ctx.strokeRect(150, 70, canvas.width - 300, canvas.height - 140);
                     ctx.fillStyle = "#10b981"; ctx.font = "bold 30px Arial";
                     ctx.fillText("👤 OYUNCU PROFİLİ & İSTATİSTİKLER", canvas.width / 2 - 280, 130);
-
                     ctx.fillStyle = "#ffffff"; ctx.font = "22px Arial";
                     ctx.fillText("Kaptan Adı: " + playerName, 220, 210);
-                    ctx.fillText("Toplam Kazanılan Zafer: " + totalWins, 220, 260);
+                    ctx.fillText("Kazanılan Zafer: " + totalWins, 220, 260);
                     ctx.fillText("Vurulan Düşman: " + stats.totalEnemiesKilled, 220, 310);
-                    ctx.fillText("Atılan Mermi: " + stats.totalBulletsFired, 220, 360);
-
                     drawButton(closeProfileBtn, "#ff3366", "#fb7185", "#ffffff", "KAPAT", "20px");
                 }
                 return;
@@ -663,23 +552,9 @@
             }
 
             if (gameState === 'other_modes') {
-                if (!isBotVsMode) {
-                    ctx.fillStyle = "#00ff66"; ctx.font = "bold 45px Arial"; ctx.fillText("🌀 DİĞER OYUN MODLARI", canvas.width / 2 - 230, 140);
-                    drawButton(trainingModeBtn, "#7209b7", "#9d4edd", "#ffffff", "🎯 EĞİTİM MODU (Ateş Et)", "20px");
-                    drawButton(botVsModeBtn, "#3a86ff", "#4ea8de", "#ffffff", "🤖 BOTA KARŞI SAVAŞ (PvP)", "20px");
-                } else {
-                    if (botVsState === 'select_char') {
-                        ctx.fillStyle = "#ffd700"; ctx.font = "bold 40px Arial"; ctx.fillText("🛡️ SAVAŞÇINI SEÇ", canvas.width / 2 - 160, 180);
-                        drawButton(botHamzaBtn, "#ff3366", "#fb7185", "#ffffff", "Kaptan Hamza", "22px");
-                        drawButton(botAlienBtn, "#2dc653", "#38b000", "#ffffff", "Uzaylı Savaşçı", "22px");
-                        drawButton(botDogBtn, "#ffaa00", "#fbbf24", "#000000", "Süper Köpek", "22px");
-                    } else if (botVsState === 'select_diff') {
-                        ctx.fillStyle = "#ffd700"; ctx.font = "bold 40px Arial"; ctx.fillText("⚡ ZORLUK SEVİYESİ SEÇ", canvas.width / 2 - 210, 180);
-                        drawButton(diffKolayBtn, "#2dc653", "#38b000", "#ffffff", "KOLAY", "22px");
-                        drawButton(diffOrtaBtn, "#ffaa00", "#fbbf24", "#000000", "ORTA", "22px");
-                        drawButton(diffZorBtn, "#ff3366", "#fb7185", "#ffffff", "ZOR", "22px");
-                    }
-                }
+                ctx.fillStyle = "#00ff66"; ctx.font = "bold 45px Arial"; ctx.fillText("🌀 DİĞER OYUN MODLARI", canvas.width / 2 - 230, 140);
+                drawButton(trainingModeBtn, "#7209b7", "#9d4edd", "#ffffff", "🎯 EĞİTİM MODU (Ateş Et)", "20px");
+                drawButton(botVsModeBtn, "#3a86ff", "#4ea8de", "#ffffff", "🤖 BOTA KARŞI SAVAŞ (PvP)", "20px");
                 drawButton(backToMenuBtn, "#ff3366", "#fb7185", "#ffffff", "ANA EKRAN", "18px");
                 return;
             }
@@ -689,37 +564,16 @@
             bullets.forEach(b => { ctx.fillStyle = b.color; ctx.fillRect(b.x, b.y, b.width, b.height); });
             ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
 
-            if (gameState === 'playing') {
-                ctx.fillStyle = touchLeftActive ? "rgba(0, 210, 255, 0.7)" : "rgba(0, 210, 255, 0.3)";
-                ctx.fillRect(touchLeftBtn.x, touchLeftBtn.y, touchLeftBtn.width, touchLeftBtn.height);
-                ctx.strokeStyle = "#00d2ff"; ctx.strokeRect(touchLeftBtn.x, touchLeftBtn.y, touchLeftBtn.width, touchLeftBtn.height);
-                ctx.fillStyle = "#fff"; ctx.font = "bold 45px Arial"; ctx.fillText("⬅️", touchLeftBtn.x + 22, touchLeftBtn.y + 82);
-
-                ctx.fillStyle = touchRightActive ? "rgba(0, 210, 255, 0.7)" : "rgba(0, 210, 255, 0.3)";
-                ctx.fillRect(touchRightBtn.x, touchRightBtn.y, touchRightBtn.width, touchRightBtn.height);
-                ctx.strokeStyle = "#00d2ff"; ctx.strokeRect(touchRightBtn.x, touchRightBtn.y, touchRightBtn.width, touchRightBtn.height);
-                ctx.fillStyle = "#fff"; ctx.font = "bold 45px Arial"; ctx.fillText("➡️", touchRightBtn.x + 22, touchRightBtn.y + 82);
-
-                ctx.fillStyle = "rgba(255, 51, 102, 0.4)";
-                ctx.fillRect(touchShootBtn.x, touchShootBtn.y, touchShootBtn.width, touchShootBtn.height);
-                ctx.strokeStyle = "#ff3366"; ctx.strokeRect(touchShootBtn.x, touchShootBtn.y, touchShootBtn.width, touchShootBtn.height);
-                ctx.fillStyle = "#fff"; ctx.font = "bold 22px Arial"; ctx.fillText("🔥 ATEŞ", touchShootBtn.x + 22, touchShootBtn.y + 72);
-
-                if (isTrainingMode || isBotVsMode) {
-                    drawButton(exitTrainingBtn, "#ff3366", "#fb7185", "#ffffff", "ÇIKIŞ (ESC)", "16px");
-                }
-            }
-
             if (gameState === 'win') {
-                ctx.fillStyle = "rgba(0, 0, 0, 0.85);"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "rgba(0, 0, 0, 0.85)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = "#00ff66"; ctx.font = "bold 58px Arial"; ctx.fillText("SEVİYE TAMAMLANDI!", canvas.width / 2 - 280, canvas.height / 2 - 80);
-                if (!isBotVsMode && currentLevel < 30) drawButton(nextLevelBtn, "#00ff66", "#34d399", "#000000", "SONRAKİ SEVİYE (S)", "20px");
-                drawButton(restartBtn, "#00d2ff", "#38bdf8", "#000000", "TEKRAR OYNA (R)", "20px");
-                drawButton(menuBtn, "#ffaa00", "#fbbf24", "#000000", "ANA EKRAN (M)", "20px");
+                if (!isBotVsMode && currentLevel < 30) drawButton(nextLevelBtn, "#00ff66", "#34d399", "#000000", "SONRAKİ SEVİYE", "20px");
+                drawButton(restartBtn, "#00d2ff", "#38bdf8", "#000000", "TEKRAR OYNA", "20px");
+                drawButton(menuBtn, "#ffaa00", "#fbbf24", "#000000", "ANA EKRAN", "20px");
             }
 
             if (gameState === 'gameover') {
-                ctx.fillStyle = "rgba(0, 0, 0, 0.85);"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "rgba(0, 0, 0, 0.85)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = "#ff3366"; ctx.font = "bold 64px Arial"; ctx.fillText("GAME OVER", canvas.width / 2 - 195, canvas.height / 2 - 80);
                 drawButton(restartBtn, "#00d2ff", "#38bdf8", "#000000", "TEKRAR DENE", "22px");
                 drawButton(menuBtn, "#ffaa00", "#fbbf24", "#000000", "ANA EKRAN", "21px");
@@ -727,6 +581,7 @@
         }
 
         function gameLoop() { update(); draw(); requestAnimationFrame(gameLoop); }
+        loadGameData();
         gameLoop();
     </script>
 </body>
