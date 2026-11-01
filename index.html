@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Uzay Macerası</title>
     <style>
         body {
@@ -17,7 +17,6 @@
             align-items: center;
             height: 100vh;
             width: 100vw;
-            touch-action: none;
         }
         canvas {
             display: block;
@@ -49,7 +48,6 @@
         let playerName = "";
         let nameInputRect = { x: canvas.width / 2 - 200, y: canvas.height / 2 - 20, width: 400, height: 60 };
         let nameSubmitBtn = { x: canvas.width / 2 - 140, y: canvas.height / 2 + 60, width: 280, height: 60 };
-        let nameErrorMsg = "";
 
         let gameState = 'name_entry'; 
         let currentLevel = 1, unlockedLevel = 1, levelPage = 1, completedUniqueLevels = [];
@@ -123,9 +121,11 @@
         let playerWidth = 70, playerHeight = 85;
         let player = { x: canvas.width / 2 - playerWidth / 2, y: canvas.height - playerHeight - 25, width: playerWidth, height: playerHeight, speed: 9, hp: 100, maxHp: 100 };
 
-        let bullets = [], bulletSpeed = 12, enemies = [], enemyBullets = [], apples = [];
+        let bullets = [], bulletSpeed = 12, enemies = [];
 
         const playerImg = new Image(); playerImg.src = 'astronot_11.png';
+        const alienImg = new Image(); alienImg.src = 'Uzaylı.png';
+        const dogImg = new Image(); dogImg.src = 'köpek_3.png';
 
         const titles = [
             { id: 'novice', name: '🌌 Çırak Uzaycı', desc: 'Oyuna ilk adımını atan cesur pilot.', unlocked: true },
@@ -134,22 +134,23 @@
         ];
 
         const celestialData = {
-            gunes: { name: "⭐ GÜNEŞ (Sistemin Kalbi)", info: "Güneş, Güneş Sistemi'nin merkezinde yer alan devasa bir yıldızdır." },
+            gunes: { name: "⭐ GÜNEŞ (Sistemin Kalbi)", info: "Güneş, Güneş Sistemi'nin merkezinde yer alan devasa bir yıldızdır.\n\n💡 OYUN İPUCU: Güneş'in enerjisi kalkan sağlar!" },
             merkur: { name: "🪐 MERKÜR (En İçteki Gezegen)", info: "Güneş'e en yakın gezegendir. Yüzeyi aşırı sıcak ve kraterlerle doludur." },
-            venus: { name: "🪐 VENÜS (Sıcak Cehennem)", info: "Güneş sisteminin en sıcak gezegenidir. Kalın atmosferi var." },
+            venus: { name: "🪐 VENÜS (Sıcak Cehennem)", info: "Güneş sisteminin en sıcak gezegenidir. Kalın atmosferi zehirli gazlardan oluşur." },
             dunya: { name: "🌍 DÜNYA (Evimiz)", info: "Üzerinde su barındıran, yaşamın olduğu bilinen tek gezegendir." },
-            ay: { name: "🌕 AY (Dünya'nın Uydusu)", info: "Dünya'nın tek doğal uydusudur." },
+            ay: { name: "🌕 AY (Dünya'nın Uydusu)", info: "Dünya'nın tek doğal uydusudur. 10. Seviyeden sonra maceralar burada başlar!" },
             mars: { name: "🔴 MARS (Kızıl Gezegen)", info: "Paslı demir toprakları yüzünden kırmızı görünür." },
             jupiter: { name: "⚡ JÜPİTER (Dev Gaz Devi)", info: "Sistemin en büyük gezegenidir." },
             saturn: { name: "💫 SATÜRN (Halkaların Efendisi)", info: "Buz ve kayalardan oluşan muhteşem halkalarıyla ünlüdür." },
-            uranus: { name: "❄️ URANÜS (Buz Devi)", info: "Yan yatmış bir varil gibi kendi etrafında döner." },
-            neptun: { name: "🌀 NEPTÜN", info: "Şiddetli rüzgarların estiği masmavi gezegendir." }
+            uranus: { name: "❄️ URANÜS (Buz Devi)", info: "Yan yatmış bir varil gibi kendi etrafında dönen soğuk bir gaz devidir." },
+            neptun: { name: "🌀 Neptün", info: "Şiddetli rüzgarların estiği masmavi gezegendir." }
         };
 
         let radioMessages = [
             "📡 MERKEZ: Kaptan, radarımızda yeni düşman sinyalleri var!",
             "📡 MERKEZ: Akçe kasalarını toplamayı unutma pilot!",
-            "📡 TELSİZ: Ay üssünden bildiriyoruz, yerçekimi düşük dikkat et."
+            "📡 TELSİZ: Ay üssünden bildiriyoruz, yerçekimi düşük dikkat et.",
+            "📡 MERKEZ: Dükkandaki özel güçler savaşta hayat kurtarır!"
         ];
         let currentRadioText = "📡 Telsiz açık. Haberler bekleniyor...";
 
@@ -165,7 +166,12 @@
             { id: 'merkur', name: '🪐 Merkür', x: 500, y: 220, width: 220, height: 55 },
             { id: 'venus', name: '🪐 Venüs', x: 740, y: 220, width: 220, height: 55 },
             { id: 'dunya', name: '🌍 Dünya', x: 980, y: 220, width: 220, height: 55 },
-            { id: 'ay', name: '🌕 Ay', x: 1220, y: 220, width: 120, height: 55 }
+            { id: 'ay', name: '🌕 Ay', x: 1220, y: 220, width: 120, height: 55 },
+            { id: 'mars', name: '🔴 Mars', x: 260, y: 295, width: 220, height: 55 },
+            { id: 'jupiter', name: '⚡ Jüpiter', x: 500, y: 295, width: 220, height: 55 },
+            { id: 'saturn', name: '💫 Satürn', x: 740, y: 295, width: 220, height: 55 },
+            { id: 'uranus', name: '❄️ Uranüs', x: 980, y: 295, width: 220, height: 55 },
+            { id: 'neptun', name: '🌀 Neptün', x: 1220, y: 295, width: 120, height: 55 }
         ];
 
         const radioBtn = { x: canvas.width / 2 - 120, y: canvas.height / 2 + 200, width: 240, height: 50 };
@@ -242,9 +248,11 @@
 
         function handleNameSubmission() {
             let enteredName = hiddenInput.value.trim();
-            if (enteredName === "") { nameErrorMsg = "Lütfen boş bırakma!"; return; }
-            playerName = enteredName; nameErrorMsg = "";
-            hiddenInput.style.display = 'none'; gameState = 'start'; saveGameData();
+            if (enteredName === "") return;
+            playerName = enteredName;
+            hiddenInput.style.display = 'none'; 
+            gameState = 'start'; 
+            saveGameData();
         }
 
         window.addEventListener("click", () => { if (gameState === 'name_entry') hiddenInput.focus(); });
@@ -274,7 +282,7 @@
                 return;
             }
             if (gameState === 'win') {
-                if (e.code === "KeyS" || e.code === "KeyN") { if (!isBotVsMode && currentLevel < 30) startPlaying(currentLevel + 1); }
+                if ((e.code === "KeyS" || e.code === "KeyN") && !isBotVsMode && currentLevel < unlockedLevel) startPlaying(currentLevel + 1);
                 else if (e.code === "KeyR" || e.code === "Enter") { if (isBotVsMode) startBotVsBattle(); else startPlaying(currentLevel); }
                 else if (e.code === "KeyM") goToMainMenu();
                 return;
@@ -284,18 +292,13 @@
                 else if (e.code === "KeyM") goToMainMenu();
                 return;
             }
-            if (gameState === 'playing' && e.code === "KeyQ") {
-                if (hasPoisonBullet && isPoisonBulletEquipped && poisonAmmoCount > 0 && !isPoisonActive) {
-                    isPoisonActive = true; poisonAmmoCount--; poisonTimer = 240;
-                }
-            }
-            if (e.code === "Space" && !keys["Space"]) shoot();
+            if (e.code === "Space" && !keys["Space"] && gameState === 'playing') shoot();
             keys[e.code] = true;
         });
 
         window.addEventListener("keyup", (e) => { keys[e.code] = false; });
 
-        function handleCanvasClickOrTouch() {
+        canvas.addEventListener("click", () => {
             if (gameState === 'name_entry') { if (isHovered(nameSubmitBtn)) handleNameSubmission(); return; }
             if (selectedCelestialBody) { if (isHovered(closeInfoCardBtn)) selectedCelestialBody = null; return; }
             if (isSpaceStationOpen) {
@@ -313,6 +316,30 @@
                 if (isHovered(catEfektBtn)) shopCategory = 'efekt';
                 if (isHovered(catOzelGucBtn)) shopCategory = 'ozel_guc';
                 if (isHovered(catSavasciBtn)) shopCategory = 'savasci';
+                if (shopCategory === 'savasci') {
+                    if (isHovered(buyAlienBtn) && !hasAlienWarrior && totalCoins >= 15000) { totalCoins -= 15000; hasAlienWarrior = true; selectedWarrior = 'alien'; saveGameData(); }
+                    if (isHovered(buyDogBtn) && !hasDogWarrior && totalCoins >= 14000) { totalCoins -= 14000; hasDogWarrior = true; selectedWarrior = 'dog'; saveGameData(); }
+                }
+                if (shopCategory === 'ozel_guc') {
+                    if (isHovered(buyDoubleShotBtn)) {
+                        if (!hasDoubleShot && totalCoins >= 1000) { totalCoins -= 1000; hasDoubleShot = true; isDoubleShotEquipped = true; saveGameData(); }
+                        else if (hasDoubleShot) { isDoubleShotEquipped = !isDoubleShotEquipped; saveGameData(); }
+                    }
+                    if (isHovered(buyPoisonBulletBtn)) {
+                        if (!hasPoisonBullet && totalCoins >= 1200) { totalCoins -= 1200; hasPoisonBullet = true; isPoisonBulletEquipped = true; saveGameData(); }
+                        else if (hasPoisonBullet) { isPoisonBulletEquipped = !isPoisonBulletEquipped; saveGameData(); }
+                    }
+                }
+                if (shopCategory === 'efekt') {
+                    if (isHovered(buyBordoEffectBtn)) {
+                        if (!hasBordoEffect && totalCoins >= 550) { totalCoins -= 550; hasBordoEffect = true; isBordoEffectEquipped = true; isOrangeEffectEquipped = false; saveGameData(); }
+                        else if (hasBordoEffect) { isBordoEffectEquipped = !isBordoEffectEquipped; if(isBordoEffectEquipped) isOrangeEffectEquipped = false; saveGameData(); }
+                    }
+                    if (isHovered(buyOrangeEffectBtn)) {
+                        if (!hasOrangeEffect && totalCoins >= 250) { totalCoins -= 250; hasOrangeEffect = true; isOrangeEffectEquipped = true; isBordoEffectEquipped = false; saveGameData(); }
+                        else if (hasOrangeEffect) { isOrangeEffectEquipped = !isOrangeEffectEquipped; if(isOrangeEffectEquipped) isBordoEffectEquipped = false; saveGameData(); }
+                    }
+                }
                 if (isHovered(closeShopBtn)) isShopOpen = false;
                 return;
             }
@@ -366,7 +393,7 @@
                         if (isHovered(page1GridBtns[i])) { 
                             let lvl = i + 1; 
                             if (lvl <= unlockedLevel) startPlaying(lvl); 
-                            else alert("⚠️ Kilitli! Önceki seviyeyi kazanmalısın."); 
+                            else alert("⚠️ Bu seviye kilitli! Önceki seviyeyi tamamlamalısın."); 
                         }
                     }
                 } else if (levelPage === 2) {
@@ -374,54 +401,64 @@
                         if (isHovered(page2GridBtns[i])) { 
                             let lvl = 11 + i; 
                             if (lvl <= unlockedLevel) startPlaying(lvl); 
-                            else alert("⚠️ Kilitli! Önceki seviyeyi kazanmalısın."); 
+                            else alert("⚠️ Bu seviye kilitli! Önceki seviyeyi tamamlamalısın."); 
                         }
                     }
                 }
-                if (isHovered(backToMenuBtn)) gameState = 'start';
+                if (isHovered(backToMenuBtn)) { gameState = 'start'; return; }
             } else if (gameState === 'win') {
-                if (!isBotVsMode && isHovered(nextLevelBtn) && currentLevel < 30) startPlaying(currentLevel + 1);
+                if (!isBotVsMode && isHovered(nextLevelBtn) && currentLevel < unlockedLevel && currentLevel < 30) startPlaying(currentLevel + 1);
                 if (isHovered(restartBtn)) { if (isBotVsMode) startBotVsBattle(); else startPlaying(currentLevel); }
-                if (isHovered(menuBtn)) goToMainMenu();
+                if (isHovered(menuBtn)) { goToMainMenu(); return; }
             } else if (gameState === 'gameover') {
                 if (isHovered(restartBtn)) { if (isBotVsMode) startBotVsBattle(); else startPlaying(currentLevel); }
-                if (isHovered(menuBtn)) goToMainMenu();
+                if (isHovered(menuBtn)) { goToMainMenu(); return; }
             }
-        }
-
-        canvas.addEventListener("click", () => { handleCanvasClickOrTouch(); });
+        });
 
         function shoot() {
-            let col = "#00f0ff";
-            bullets.push({ x: player.x + player.width / 2 - 3, y: player.y + 20, width: 6, height: 18, color: col });
-            stats.totalBulletsFired += 1;
+            let col = isBordoEffectEquipped ? "#800020" : isOrangeEffectEquipped ? "#ff7b00" : "#00f0ff";
+            let isP = false;
+            if (isPoisonBulletEquipped && isPoisonActive) { col = "#00ff66"; isP = true; isPoisonActive = false; }
+            if (isDoubleShotEquipped) {
+                bullets.push({ x: player.x + 20, y: player.y + 20, width: 6, height: 18, color: col, isPoison: isP });
+                bullets.push({ x: player.x + player.width - 26, y: player.y + 20, width: 6, height: 18, color: col, isPoison: isP });
+                stats.totalBulletsFired += 2;
+            } else {
+                bullets.push({ x: player.x + player.width / 2 - 3, y: player.y + 20, width: 6, height: 18, color: col, isPoison: isP });
+                stats.totalBulletsFired += 1;
+            }
             saveGameData();
         }
 
         function startBotVsBattle() {
             isBotVsMode = true; gameState = 'playing';
             player.x = canvas.width / 2 - playerWidth / 2; player.y = canvas.height - playerHeight - 25;
-            player.hp = 100; player.speed = 9;
-            bullets = []; enemies = []; initEnemies(1);
+            player.maxHp = selectedWarrior === 'dog' ? 85 : selectedWarrior === 'alien' ? 105 : 100;
+            player.hp = player.maxHp; player.speed = selectedWarrior === 'dog' ? 12 : 9;
+            bullets = []; initEnemies(1);
         }
 
         function startPlaying(level) {
-            currentLevel = level; isBotVsMode = false;
+            currentLevel = level; isBotVsMode = false; isTrainingMode = false;
             player.x = canvas.width / 2 - playerWidth / 2; player.y = canvas.height - playerHeight - 25;
-            player.hp = 100; player.speed = 9;
-            bullets = []; enemies = []; initEnemies(currentLevel);
+            player.maxHp = selectedWarrior === 'dog' ? 85 : selectedWarrior === 'alien' ? 105 : 100;
+            player.hp = player.maxHp; player.speed = selectedWarrior === 'dog' ? 12 : 9;
+            bullets = []; initEnemies(currentLevel);
             gameState = 'playing';
         }
 
         function goToMainMenu() {
-            player.hp = 100; bullets = [];
+            bullets = []; enemies = [];
             isTrainingMode = false; isBotVsMode = false; botVsState = 'select_char'; gameState = 'start';
         }
 
         function initEnemies(level) {
             enemies = [];
             if (isBotVsMode) {
-                enemies = [{ x: canvas.width / 2 - 45, y: 110, width: 90, height: 110, hp: 100, maxHp: 100, dx: 4, speed: 4, color: "#e63946", isBotEnemy: true, aiDecisionTimer: 0, targetX: canvas.width / 2 - 45 }];
+                let hp = selectedBotCharacter === 'alien' ? 105 : selectedBotCharacter === 'dog' ? 85 : 100;
+                let spd = botDifficulty === 'kolay' ? 3.5 : botDifficulty === 'orta' ? 5.5 : 7.5;
+                enemies = [{ x: canvas.width / 2 - 45, y: 110, width: 90, height: 110, hp: hp, maxHp: hp, dx: spd, speed: spd, color: "#e63946", isBotEnemy: true, aiDecisionTimer: 0, targetX: canvas.width / 2 - 45 }];
                 return;
             }
             if (isTrainingMode) {
@@ -434,6 +471,15 @@
         function update() {
             if (gameState !== 'playing' || isShopOpen || isWarriorsOpen || isHelpOpen || isProfileOpen || isNewsOpen || isQuestsOpen || isUniverseMapOpen || isTitlesOpen || isSpaceStationOpen || selectedCelestialBody) return;
 
+            if (poisonTimer > 0) {
+                poisonTimer--; poisonTickTimer++;
+                if (poisonTickTimer >= 60 && enemies.length > 0) {
+                    enemies[0].hp -= 2;
+                    if (enemies[0].hp <= 0) { stats.totalEnemiesKilled++; enemies.splice(0, 1); }
+                    poisonTickTimer = 0;
+                }
+            }
+
             if (keys["ArrowLeft"] && player.x > 0) player.x -= player.speed;
             if (keys["ArrowRight"] && player.x < canvas.width - player.width) player.x += player.speed;
 
@@ -443,7 +489,8 @@
                 for (let j = enemies.length - 1; j >= 0; j--) {
                     let en = enemies[j];
                     if (bullets[i] && bullets[i].x < en.x + en.width && bullets[i].x + bullets[i].width > en.x && bullets[i].y < en.y + en.height && bullets[i].y + bullets[i].height > en.y) {
-                        en.hp -= 1; hit = true;
+                        en.hp -= 1; if (bullets[i].isPoison) { poisonTimer = 240; poisonTickTimer = 0; }
+                        hit = true;
                         if (en.hp <= 0) { stats.totalEnemiesKilled++; enemies.splice(j, 1); }
                         break;
                     }
@@ -456,7 +503,10 @@
                     totalCoins += currentLevel * 10;
                     totalWins++;
                     if (!isBotVsMode) {
-                        if (currentLevel === unlockedLevel) unlockedLevel++;
+                        if (currentLevel === 5) titles.find(t => t.id === 'boss_slayer').unlocked = true;
+                        if (currentLevel === 10) titles.find(t => t.id === 'ay_dede').unlocked = true;
+                        if (!completedUniqueLevels.includes(currentLevel)) completedUniqueLevels.push(currentLevel);
+                        if (currentLevel === unlockedLevel && unlockedLevel < 30) unlockedLevel++;
                     }
                     saveGameData();
                 }
@@ -465,8 +515,15 @@
             }
 
             enemies.forEach(en => {
-                en.x += en.dx;
-                if (en.x <= 20 || en.x + en.width >= canvas.width - 20) en.dx *= -1;
+                if (en.isBotEnemy) {
+                    en.aiDecisionTimer++;
+                    if (en.aiDecisionTimer > 60) { en.targetX = Math.max(50, Math.min(canvas.width - en.width - 50, player.x + (Math.random() * 200 - 100))); en.aiDecisionTimer = 0; }
+                    if (en.x < en.targetX) en.x = Math.min(en.targetX, en.x + en.speed);
+                    else if (en.x > en.targetX) en.x = Math.max(en.targetX, en.x - en.speed);
+                } else {
+                    en.x += en.dx;
+                    if (en.x <= 20 || en.x + en.width >= canvas.width - 20) en.dx *= -1;
+                }
             });
         }
 
@@ -500,7 +557,7 @@
             ctx.fillStyle = "#07071a"; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             if (gameState === 'start') {
-                drawButton(profileBtn, "#10b981", "#34d399", "#ffffff", "👤 LİDERLİK", "19px");
+                drawButton(profileBtn, "#10b981", "#34d399", "#ffffff", "👤 PROFİL", "19px");
                 drawButton(shopBtn, "#00d2ff", "#38bdf8", "#000000", "🛒 DÜKKAN", "19px");
                 drawButton({ x: shopBtn.x + shopBtn.width + 15, y: shopBtn.y, width: 200, height: 50 }, "#ffd700", "#fde047", "#000000", "🪙 AKÇE: " + totalCoins, "18px");
                 drawButton(helpBtn, "#a855f7", "#c084fc", "#ffffff", "❓ YARDIM", "19px");
@@ -521,16 +578,127 @@
                 drawButton(warriorsBtn, "#ffaa00", "#fbbf24", "#000000", "🛡️ SAVAŞÇILAR", "22px");
                 drawButton(startBtn, "#ff3366", "#fb7185", "#ffffff", "OYUNA BAŞLA", "24px");
 
+                // PENCERELER
                 if (isProfileOpen) {
                     ctx.fillStyle = "rgba(0, 20, 15, 0.98)"; ctx.fillRect(150, 70, canvas.width - 300, canvas.height - 140);
                     ctx.strokeStyle = "#10b981"; ctx.lineWidth = 4; ctx.strokeRect(150, 70, canvas.width - 300, canvas.height - 140);
-                    ctx.fillStyle = "#10b981"; ctx.font = "bold 30px Arial";
-                    ctx.fillText("👤 OYUNCU PROFİLİ & İSTATİSTİKLER", canvas.width / 2 - 280, 130);
+                    ctx.fillStyle = "#10b981"; ctx.font = "bold 30px Arial"; ctx.fillText("👤 OYUNCU PROFİLİ", canvas.width / 2 - 150, 130);
                     ctx.fillStyle = "#ffffff"; ctx.font = "22px Arial";
                     ctx.fillText("Kaptan Adı: " + playerName, 220, 210);
                     ctx.fillText("Kazanılan Zafer: " + totalWins, 220, 260);
                     ctx.fillText("Vurulan Düşman: " + stats.totalEnemiesKilled, 220, 310);
                     drawButton(closeProfileBtn, "#ff3366", "#fb7185", "#ffffff", "KAPAT", "20px");
+                }
+                if (isShopOpen) {
+                    ctx.fillStyle = "rgba(0, 15, 30, 0.98)"; ctx.fillRect(150, 70, canvas.width - 300, canvas.height - 140);
+                    ctx.strokeStyle = "#00d2ff"; ctx.lineWidth = 4; ctx.strokeRect(150, 70, canvas.width - 300, canvas.height - 140);
+                    ctx.fillStyle = "#00d2ff"; ctx.font = "bold 30px Arial"; ctx.fillText("🛒 GALAKTİK DÜKKAN", canvas.width / 2 - 150, 130);
+                    drawButton(catEfektBtn, shopCategory === 'efekt' ? "#00f0ff" : "#1e293b", "#38bdf8", shopCategory === 'efekt' ? "#000" : "#fff", "Lazer Efektleri", "17px");
+                    drawButton(catOzelGucBtn, shopCategory === 'ozel_guc' ? "#00f0ff" : "#1e293b", "#38bdf8", shopCategory === 'ozel_guc' ? "#000" : "#fff", "Özel Güçler", "17px");
+                    drawButton(catSavasciBtn, shopCategory === 'savasci' ? "#00f0ff" : "#1e293b", "#38bdf8", shopCategory === 'savasci' ? "#000" : "#fff", "Savaşçılar", "17px");
+                    
+                    if (shopCategory === 'efekt') {
+                        ctx.fillStyle = "#fff"; ctx.font = "20px Arial";
+                        ctx.fillText("Bordo Lazer Efekti (550 Akçe): " + (hasBordoEffect ? "SAHİPSİN" : "AL"), 200, 350);
+                        drawButton(buyBordoEffectBtn, "#00ff66", "#34d399", "#000", hasBordoEffect ? (isBordoEffectEquipped ? "KULLANIMDA" : "KUŞAN") : "SATIN AL", "16px");
+                    } else if (shopCategory === 'ozel_guc') {
+                        ctx.fillStyle = "#fff"; ctx.font = "20px Arial";
+                        ctx.fillText("Çift Atış (1000 Akçe): " + (hasDoubleShot ? "SAHİPSİN" : "AL"), 200, 310);
+                        drawButton(buyDoubleShotBtn, "#00ff66", "#34d399", "#000", hasDoubleShot ? (isDoubleShotEquipped ? "AKTİF" : "AÇ") : "SATIN AL", "16px");
+                    } else if (shopCategory === 'savasci') {
+                        ctx.fillStyle = "#fff"; ctx.font = "20px Arial";
+                        ctx.fillText("Uzaylı Savaşçı (15000 Akçe): " + (hasAlienWarrior ? "SAHİPSİN" : "AL"), 200, 330);
+                        drawButton(buyAlienBtn, "#00ff66", "#34d399", "#000", hasAlienWarrior ? "AÇIK" : "SATIN AL", "16px");
+                    }
+                    drawButton(closeShopBtn, "#ff3366", "#fb7185", "#ffffff", "KAPAT", "20px");
+                }
+                if (isWarriorsOpen) {
+                    ctx.fillStyle = "rgba(20, 15, 0, 0.98)"; ctx.fillRect(150, 70, canvas.width - 300, canvas.height - 140);
+                    ctx.strokeStyle = "#ffaa00"; ctx.lineWidth = 4; ctx.strokeRect(150, 70, canvas.width - 300, canvas.height - 140);
+                    ctx.fillStyle = "#ffaa00"; ctx.font = "bold 30px Arial"; ctx.fillText("🛡️ SAVAŞÇI SEÇİMİ", canvas.width / 2 - 140, 130);
+                    ctx.drawImage(playerImg, 300, 220, 100, 115);
+                    drawButton(selectHamzaBtn, selectedWarrior === 'hamza' ? "#00ff66" : "#334155", "#34d399", "#000", selectedWarrior === 'hamza' ? "SEÇİLİ" : "SEÇ", "16px");
+                    if (hasAlienWarrior) {
+                        ctx.drawImage(alienImg, 675, 220, 100, 115);
+                        drawButton(selectAlienBtn, selectedWarrior === 'alien' ? "#00ff66" : "#334155", "#34d399", "#000", selectedWarrior === 'alien' ? "SEÇİLİ" : "SEÇ", "16px");
+                    }
+                    if (hasDogWarrior) {
+                        ctx.drawImage(dogImg, 1050, 220, 100, 115);
+                        drawButton(selectDogBtn, selectedWarrior === 'dog' ? "#00ff66" : "#334155", "#34d399", "#000", selectedWarrior === 'dog' ? "SEÇİLİ" : "SEÇ", "16px");
+                    }
+                    drawButton(closeWarriorsBtn, "#ff3366", "#fb7185", "#ffffff", "KAPAT", "20px");
+                }
+                if (isHelpOpen) {
+                    ctx.fillStyle = "rgba(20, 0, 30, 0.98)"; ctx.fillRect(150, 70, canvas.width - 300, canvas.height - 140);
+                    ctx.strokeStyle = "#a855f7"; ctx.lineWidth = 4; ctx.strokeRect(150, 70, canvas.width - 300, canvas.height - 140);
+                    ctx.fillStyle = "#a855f7"; ctx.font = "bold 30px Arial"; ctx.fillText("❓ OYUN YARDIMI & KONTROLLER", canvas.width / 2 - 220, 130);
+                    ctx.fillStyle = "#fff"; ctx.font = "20px Arial";
+                    ctx.fillText("• Sol / Sağ Ok Tuşları: Uzay gemisini hareket ettirir.", 220, 210);
+                    ctx.fillText("• Boşluk Tuşu: Lazer atışı yapar.", 220, 260);
+                    drawButton(closeHelpBtn, "#ff3366", "#fb7185", "#ffffff", "KAPAT", "20px");
+                }
+                if (isNewsOpen) {
+                    ctx.fillStyle = "rgba(10, 20, 30, 0.98)"; ctx.fillRect(150, 70, canvas.width - 300, canvas.height - 140);
+                    ctx.strokeStyle = "#00d2ff"; ctx.lineWidth = 4; ctx.strokeRect(150, 70, canvas.width - 300, canvas.height - 140);
+                    ctx.fillStyle = "#00d2ff"; ctx.font = "bold 30px Arial"; ctx.fillText("📰 GALAKTİK HABERLER", canvas.width / 2 - 160, 130);
+                    ctx.fillStyle = "#fff"; ctx.font = "20px Arial";
+                    ctx.fillText("• Yeni özel güçler dükkandaki yerini aldı!", 220, 220);
+                    drawButton(closeNewsBtn, "#ff3366", "#fb7185", "#ffffff", "KAPAT", "20px");
+                }
+                if (isQuestsOpen) {
+                    ctx.fillStyle = "rgba(30, 10, 30, 0.98)"; ctx.fillRect(150, 70, canvas.width - 300, canvas.height - 140);
+                    ctx.strokeStyle = "#e056fd"; ctx.lineWidth = 4; ctx.strokeRect(150, 70, canvas.width - 300, canvas.height - 140);
+                    ctx.fillStyle = "#e056fd"; ctx.font = "bold 30px Arial"; ctx.fillText("🎯 GÜNLÜK GÖREVLER", canvas.width / 2 - 150, 130);
+                    ctx.fillStyle = "#fff"; ctx.font = "20px Arial";
+                    ctx.fillText("• 10 Düşman Yok Et (" + Math.min(10, stats.totalEnemiesKilled) + "/10)", 220, 220);
+                    drawButton(closeQuestsBtn, "#ff3366", "#fb7185", "#ffffff", "KAPAT", "20px");
+                }
+                if (isUniverseMapOpen) {
+                    ctx.fillStyle = "rgba(10, 10, 40, 0.98)"; ctx.fillRect(150, 70, canvas.width - 300, canvas.height - 140);
+                    ctx.strokeStyle = "#3a86ff"; ctx.lineWidth = 4; ctx.strokeRect(150, 70, canvas.width - 300, canvas.height - 140);
+                    ctx.fillStyle = "#3a86ff"; ctx.font = "bold 30px Arial"; ctx.fillText("🌌 GİDİLEN GEZEGENLER", canvas.width / 2 - 160, 130);
+                    ctx.fillStyle = "#fff"; ctx.font = "20px Arial";
+                    let mapY = 200;
+                    completedUniqueLevels.forEach(lvl => {
+                        ctx.fillText("• Seviye " + lvl + " Bölgesi Keşfedildi", 220, mapY);
+                        mapY += 40;
+                    });
+                    drawButton(closeUniverseMapBtn, "#ff3366", "#fb7185", "#ffffff", "KAPAT", "20px");
+                }
+                if (isTitlesOpen) {
+                    ctx.fillStyle = "rgba(40, 10, 20, 0.98)"; ctx.fillRect(150, 70, canvas.width - 300, canvas.height - 140);
+                    ctx.strokeStyle = "#f72585"; ctx.lineWidth = 4; ctx.strokeRect(150, 70, canvas.width - 300, canvas.height - 140);
+                    ctx.fillStyle = "#f72585"; ctx.font = "bold 30px Arial"; ctx.fillText("🎖️ KAPTAN ÜNVANLARI", canvas.width / 2 - 150, 130);
+                    let tY = 200;
+                    titles.forEach(t => {
+                        ctx.fillStyle = t.unlocked ? "#00ff66" : "#888";
+                        ctx.font = "bold 20px Arial";
+                        ctx.fillText(`${t.name} - ${t.desc} (${t.unlocked ? "AÇIK" : "KİLİTLİ"})`, 220, tY);
+                        tY += 50;
+                    });
+                    drawButton(closeTitlesBtn, "#ff3366", "#fb7185", "#ffffff", "KAPAT", "20px");
+                }
+                if (isSpaceStationOpen) {
+                    ctx.fillStyle = "rgba(0, 30, 20, 0.98)"; ctx.fillRect(150, 70, canvas.width - 300, canvas.height - 140);
+                    ctx.strokeStyle = "#00ff66"; ctx.lineWidth = 4; ctx.strokeRect(150, 70, canvas.width - 300, canvas.height - 140);
+                    ctx.fillStyle = "#00ff66"; ctx.font = "bold 30px Arial"; ctx.fillText("🚀 UZAY İSTASYONU & RADAR", canvas.width / 2 - 200, 110);
+                    
+                    celestialButtons.forEach(btn => { drawButton(btn, "#1e293b", "#334155", "#fff", btn.name, "15px"); });
+                    drawButton(radioBtn, "#3a86ff", "#4ea8de", "#fff", "📡 TELSİZİ DİNLE", "18px");
+                    
+                    ctx.fillStyle = "#ffd700"; ctx.font = "18px Arial"; ctx.fillText(currentRadioText, canvas.width / 2 - 280, canvas.height / 2 + 130);
+                    drawButton(closeSpaceStationBtn, "#ff3366", "#fb7185", "#ffffff", "KAPAT", "20px");
+
+                    if (selectedCelestialBody) {
+                        ctx.fillStyle = "rgba(0, 0, 0, 0.95)"; ctx.fillRect(350, 200, canvas.width - 700, 400);
+                        ctx.strokeStyle = "#ffd700"; ctx.lineWidth = 3; ctx.strokeRect(350, 200, canvas.width - 700, 400);
+                        ctx.fillStyle = "#ffd700"; ctx.font = "bold 26px Arial"; ctx.fillText(selectedCelestialBody.name, 400, 260);
+                        ctx.fillStyle = "#fff"; ctx.font = "20px Arial";
+                        let lines = selectedCelestialBody.info.split('\n');
+                        let lY = 320;
+                        lines.forEach(l => { ctx.fillText(l, 400, lY); lY += 35; });
+                        drawButton(closeInfoCardBtn, "#ff3366", "#fb7185", "#ffffff", "TAMAM", "18px");
+                    }
                 }
                 return;
             }
@@ -567,16 +735,9 @@
             if (gameState === 'win') {
                 ctx.fillStyle = "rgba(0, 0, 0, 0.85)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = "#00ff66"; ctx.font = "bold 58px Arial"; ctx.fillText("SEVİYE TAMAMLANDI!", canvas.width / 2 - 280, canvas.height / 2 - 80);
-                if (!isBotVsMode && currentLevel < 30) drawButton(nextLevelBtn, "#00ff66", "#34d399", "#000000", "SONRAKİ SEVİYE", "20px");
+                if (!isBotVsMode && currentLevel < unlockedLevel && currentLevel < 30) drawButton(nextLevelBtn, "#00ff66", "#34d399", "#000000", "SONRAKİ SEVİYE", "20px");
                 drawButton(restartBtn, "#00d2ff", "#38bdf8", "#000000", "TEKRAR OYNA", "20px");
                 drawButton(menuBtn, "#ffaa00", "#fbbf24", "#000000", "ANA EKRAN", "20px");
-            }
-
-            if (gameState === 'gameover') {
-                ctx.fillStyle = "rgba(0, 0, 0, 0.85)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = "#ff3366"; ctx.font = "bold 64px Arial"; ctx.fillText("GAME OVER", canvas.width / 2 - 195, canvas.height / 2 - 80);
-                drawButton(restartBtn, "#00d2ff", "#38bdf8", "#000000", "TEKRAR DENE", "22px");
-                drawButton(menuBtn, "#ffaa00", "#fbbf24", "#000000", "ANA EKRAN", "21px");
             }
         }
 
