@@ -45,7 +45,7 @@
 
         let gameState = 'name_entry'; // 'name_entry', 'start', 'level_select', 'playing', 'win', 'gameover', 'other_modes'
         let currentLevel = 1;
-        let unlockedLevel = 1;
+        let unlockedLevel = 1; // SADECE 1. SEVİYE AÇIK BAŞLAR
         let levelPage = 1;
         let completedUniqueLevels = [];
 
@@ -1044,16 +1044,16 @@
                 if (isProfileOpen) {
                     ctx.fillStyle = "rgba(0, 20, 15, 0.96)"; ctx.fillRect(200, 70, canvas.width - 400, canvas.height - 140);
                     ctx.strokeStyle = "#10b981"; ctx.lineWidth = 4; ctx.strokeRect(200, 70, canvas.width - 400, canvas.height - 140);
-                    ctx.fillStyle = "#10b981"; ctx.font = "bold 42px Arial"; ctx.fillText("👤 PROFİL & LİDERLİK", canvas.width / 2 - 220, 135);
+                    ctx.fillStyle = "#10b981"; ctx.font = "bold 42px Arial"; ctx.fillText("👤 PROFİL & BİLGİLER", canvas.width / 2 - 200, 135);
 
                     ctx.fillStyle = "#ffffff"; ctx.font = "18px Arial";
                     ctx.fillText(`• Oyuncu Adı: ${playerName}`, 265, 250);
                     ctx.fillText(`• Vurulan Düşman: ${stats.totalEnemiesKilled}`, 265, 280);
                     ctx.fillText(`• Kazanılan Maç: ${totalWins}`, 265, 310);
 
-                    let hamzaScore = (stats.totalEnemiesKilled * 100) + (totalWins * 500);
-                    ctx.fillStyle = "#ffd700"; ctx.font = "bold 24px Arial";
-                    ctx.fillText(`🏆 Güncel Puanın: ${hamzaScore} P`, 265, 370);
+                    // Sıralama kaldırıldı, istenen yazı eklendi
+                    ctx.fillStyle = "#ffd700"; ctx.font = "bold 22px Arial";
+                    ctx.fillText("buraya yakında bir şey eklenecek :)", 265, 370);
 
                     drawButton(closeProfileBtn, "#ff3366", "#fb7185", "#ffffff", "KAPAT", "20px");
                 }
